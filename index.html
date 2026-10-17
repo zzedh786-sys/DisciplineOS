@@ -292,6 +292,14 @@ table.hg{border-collapse:collapse;width:100%;font-size:12px}
 .sbar .field>span b{color:var(--ink)}
 .sbar-read{white-space:pre-wrap;font-size:13px}
 
+.chip.pick{font-family:var(--font-m);font-size:13px;text-transform:none;letter-spacing:0;min-height:38px}
+.chip.pick.on{background:var(--ink);color:var(--bg)}
+.chip.pick.ex.on{background:var(--red);color:var(--on-red);box-shadow:none}
+.fixes{margin:8px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.fixes li{font-size:12px;padding-left:16px;position:relative}
+.fixes li::before{content:"→";position:absolute;left:0}
+.fixes:empty{display:none}
+
 /* ---------- OVERLAYS ---------- */
 .ov{position:fixed;inset:0;z-index:90;display:flex;flex-direction:column;padding:calc(20px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(20px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 #boot{background:var(--term-bg);color:var(--term-fg);z-index:100;font-size:13px;justify-content:flex-end;transition:opacity .16s}
@@ -341,6 +349,34 @@ table.hg{border-collapse:collapse;width:100%;font-size:12px}
 #toast.in{animation:tin .16s ease-out}
 @keyframes tin{from{transform:translate(-50%,10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 
+/* ---------- WORLD.EXE ---------- */
+body.in-world #app,body.in-world #nav,body.in-world #bg,body.in-world #fx{visibility:hidden}
+#world{padding:0;background:var(--bg);touch-action:none;user-select:none;-webkit-user-select:none;z-index:91}
+#wcv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+.whud{position:absolute;inset:0;pointer-events:none}
+.wtop{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px))}
+.wroom{flex:1;min-width:0;font-family:var(--font-h);font-size:24px;line-height:1;text-transform:uppercase;color:var(--ink);font-synthesis:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wroom small{display:block;font-family:var(--font-m);font-size:11px;letter-spacing:.08em;color:var(--mute);margin-top:3px;overflow:hidden;text-overflow:ellipsis}
+.wxp{font-size:12px;letter-spacing:.06em;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.wtop .btn{pointer-events:auto}
+.xh{position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px}
+.xh::before,.xh::after{content:"";position:absolute;background:var(--ink)}
+.xh::before{left:10px;top:0;width:2px;height:22px}
+.xh::after{top:10px;left:0;height:2px;width:22px}
+.xh.on::before,.xh.on::after{background:var(--red)}
+.whint{position:absolute;left:50%;top:calc(50% + 24px);transform:translateX(-50%);font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:var(--ink);color:var(--bg);padding:4px 8px;white-space:nowrap;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
+.whint:empty{display:none}
+.wkeys{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));font-size:11px;color:var(--mute);letter-spacing:.06em;text-transform:uppercase;text-align:right;line-height:1.6}
+.joy{position:absolute;left:calc(22px + env(safe-area-inset-left,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px));width:128px;height:128px;box-shadow:inset 0 0 0 2px var(--ink);background:var(--panel);pointer-events:auto;touch-action:none;clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+.joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;background:var(--ink);clip-path:polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%)}
+@media (pointer:fine){.joy{display:none}}
+@media (pointer:coarse){.wkeys{display:none}}
+#world.panel-open .joy{display:none}
+.wpanel{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));width:min(560px,calc(100% - 32px));background:var(--panel-solid);box-shadow:inset 0 0 0 2px var(--ink);padding:14px;display:grid;gap:10px;pointer-events:auto;max-height:60vh;overflow:auto}
+.wpanel .row .btn{flex:1 1 120px}
+.wload{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;font-family:var(--font-h);font-size:28px;line-height:1.1;background:var(--bg);color:var(--ink);pointer-events:auto;text-transform:uppercase;font-synthesis:none}
+.wload small{display:block;font-family:var(--font-m);font-size:12px;letter-spacing:.08em;color:var(--mute);margin-top:10px;text-transform:none}
+
 /* Reduced motion */
 .rm *,.rm *::before,.rm *::after{animation:none!important;transition:none!important}
 .rm #chant .w{visibility:visible}
@@ -376,6 +412,7 @@ table.hg{border-collapse:collapse;width:100%;font-size:12px}
   <button data-act="nav" data-v="week"><b>week</b>.log</button>
   <button data-act="nav" data-v="month"><b>month</b>.map</button>
   <button data-act="nav" data-v="handover"><b>handover</b>.txt</button>
+  <button data-act="nav" data-v="world"><b>world</b>.exe</button>
   <button data-act="nav" data-v="settings"><b>settings</b>.cfg</button>
 </div></nav>
 
@@ -405,6 +442,18 @@ table.hg{border-collapse:collapse;width:100%;font-size:12px}
 </div>
 
 <div id="chant" class="ov" hidden aria-live="assertive"></div>
+<div id="world" class="ov" hidden role="dialog" aria-label="World">
+  <canvas id="wcv"></canvas>
+  <div class="whud">
+    <div class="wtop"><div class="wroom" id="wRoom">THE WAITING ROOM<small></small></div><div class="wxp" id="wXp"></div><button class="btn sm" data-act="w-exit">EXIT</button></div>
+    <div class="xh" id="wXh" aria-hidden="true"></div>
+    <div class="whint" id="wHint"></div>
+    <div class="wkeys">WASD / arrows to walk · drag to look<br>click or E to interact · Esc to exit</div>
+    <div class="joy" id="wJoy" aria-label="Move"><i id="wKnob"></i></div>
+    <div class="wpanel" id="wPanel" hidden></div>
+    <div class="wload" id="wLoad">LOADING WORLD…</div>
+  </div>
+</div>
 <div id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" id="sheet"></div></div>
 <div id="toast" hidden role="status" aria-live="polite"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
@@ -445,6 +494,27 @@ const vibrate = n => { try { navigator.vibrate && navigator.vibrate(n); } catch 
    Defaults (editable starter data)
    ========================================================= */
 const LO_IDS = ['day', 'long', 'nights', 'post', 'off'];
+const DEFAULT_CATS = [
+  { id: 'health', name: 'Health', sub: 'move · fuel · daylight' },
+  { id: 'study', name: 'Clinical & Study', sub: 'AKT · portfolio · training' },
+  { id: 'create', name: 'Create', sub: 'script · film · edit' },
+  { id: 'admin', name: 'Life Admin', sub: 'rota · forms · errands' },
+  { id: 'finance', name: 'Finance', sub: 'money · pension · bills' },
+  { id: 'spirit', name: 'Mind & Spirit', sub: 'stillness · gratitude · faith' },
+  { id: 'sleep', name: 'Sleep & Recovery', sub: 'wind-down · rest' },
+];
+const HCAT = { 'h-light': 'health', 'h-train': 'health', 'h-akt': 'study', 'h-still': 'spirit', 'h-nophone': 'spirit', 'h-food': 'health', 'h-content': 'create', 'h-eport': 'study', 'h-money': 'finance', 'h-wind': 'sleep', 'h-phone': 'sleep' };
+const DEFAULT_EXCUSES = ["I wasn't feeling like it", 'Too tired from work', 'Doomscrolling', 'No time', 'Shift overran', 'Forgot', 'The plan was too big'];
+const EXCUSE_FIX = {
+  "i wasn't feeling like it": 'Motivation follows action. Tomorrow, start the 2-minute version and let the feeling catch up.',
+  'too tired from work': "Tired is allowed. Make tomorrow's target the 2-minute minimum and protect sleep tonight.",
+  'doomscrolling': 'Make it difficult: phone in another room before the next block. Log the urge when it hits.',
+  'no time': 'Give it a time and a place. Without both it is a wish, not a plan.',
+  'shift overran': "Shifts overrun. Switch tomorrow's loadout so the targets fit the day you actually have.",
+  'forgot': 'Make it obvious: stack it onto something you already do every day.',
+  'the plan was too big': "Shrink it. A small Highlight you finish beats a big one you don't.",
+};
+const fixFor = e => EXCUSE_FIX[String(e).toLowerCase().trim()] || 'Name the friction, then remove one piece of it before tomorrow.';
 const XP_TASK = { routine: 10, semi: 20, urgent: 35 };
 const XP_HL = 50, XP_HANDOVER = 15, XP_URGE = 5, URGE_CAP = 5;
 const LV_NAME = { routine: 'ROUTINE', semi: 'SEMI-URGENT', urgent: 'URGENT' };
@@ -460,13 +530,16 @@ function defaults() {
     hb('h-light', 'am', 'Daylight + water', '10 min outside light and 500 ml water', 'Open the curtains and drink one glass', 'After my alarm goes off', 'On waking', 'Window / outside', 3, 15),
     hb('h-train', 'am', 'Train', '30 min gym, run or home circuit', '10 press-ups and 10 squats', 'After I get dressed', '07:00', 'Living room', 0, 25),
     hb('h-akt', 'am', 'AKT revision', '40 AKT questions, then review the wrong ones', '5 questions', 'After I pour my coffee', '07:30', 'Kitchen table', 1, 25),
+    hb('h-still', 'am', 'Stillness', '5 min prayer, meditation or gratitude journal', 'Write one line of gratitude', 'After I finish my coffee', 'Morning', 'Quiet corner', 4, 15),
     hb('h-nophone', 'am', 'Phone-free start', 'No phone until the start routine is cleared', 'No social apps before I leave the house', 'After I switch off my alarm', 'Morning', 'Bedroom', 2, 15),
     hb('h-food', 'pm', 'Fuel tomorrow', "Prep tomorrow's meals and shift snacks", 'Pack a water bottle and one snack', 'After I get home and change', 'After shift', 'Kitchen', 0, 15),
     hb('h-content', 'pm', 'Content block', 'Script, film or edit inside the content block only', 'Write one hook idea in notes', 'After I sit down at my desk', '19:00–20:00', 'Desk', 2, 25),
     hb('h-eport', 'pm', 'E-portfolio entry', 'Write one full log entry', 'Jot two lines of a learning point', 'After dinner', '20:15', 'Desk', 1, 20),
+    hb('h-money', 'pm', 'Money check', "Log today's spending and check the account", 'Open the banking app and look at the balance', 'After I clear the dinner plates', 'Evening', 'Sofa', 5, 15),
     hb('h-wind', 'pm', 'Sleep wind-down', 'Screens off 30 min before bed, then read', 'Dim the lights and read two pages', 'After I brush my teeth', '22:30', 'Bedroom', 3, 20),
     hb('h-phone', 'pm', 'Phone in another room', 'Phone charges outside the bedroom', 'Phone face-down across the room', 'After I plug my phone in', 'Bedtime', 'Hallway', 3, 15),
   ];
+  habits.forEach(h => { h.cat = HCAT[h.id] || 'health'; });
   const F = 'full', M = 'min';
   const all = t => Object.fromEntries(habits.map(h => [h.id, { t }]));
   const loadouts = {
@@ -476,6 +549,8 @@ function defaults() {
     post: { name: 'Post-Nights', short: 'PN', hours: 'Recovery', habits: { 'h-light': { t: F, f: '15 min daylight after waking to reset the clock' }, 'h-nophone': { t: M }, 'h-food': { t: M }, 'h-wind': { t: F }, 'h-phone': { t: F } } },
     off: { name: 'Day Off', short: 'OFF', hours: 'Free', habits: all(F) },
   };
+  loadouts.day.habits['h-still'] = { t: M }; loadouts.long.habits['h-still'] = { t: M }; loadouts.nights.habits['h-still'] = { t: M };
+  loadouts.post.habits['h-still'] = { t: F }; loadouts.post.habits['h-money'] = { t: M };
   const T = (title, level, o = {}) => Object.assign({ id: uid(), title, level, deadline: null, created: now, touched: now, done: null, doneKey: null, escalated: false, notes: '' }, o);
   const tasks = [
     T('Book AKT exam slot', 'urgent', { deadline: now + 3 * D, created: now - 2 * D, touched: now - 2 * D, notes: 'Example task. Check the booking window and study leave.' }),
@@ -487,10 +562,16 @@ function defaults() {
     T('Script: things the bleep says at 3am', 'routine', { created: now - D, touched: now - D }),
     T('Pay GMC annual retention fee', null, { created: now - 5 * H, touched: now - 5 * H }),
     T('Ask supervisor about ES meeting date', null, { created: now - 2 * H, touched: now - 2 * H }),
+    T('Check payslip and pension statement', 'routine', { created: now - 2 * D, touched: now - 2 * D, cat: 'finance' }),
+    T('Set up a monthly standing order into savings', 'semi', { created: now - 3 * D, touched: now - 3 * D, cat: 'finance' }),
+    T('Book a dentist check-up', 'routine', { created: now - D, touched: now - D, cat: 'admin' }),
   ];
+  const tc = ['study', 'admin', 'study', 'create', 'study', 'study', 'create', 'finance', 'study'];
+  tasks.forEach((t, i) => { if (!t.cat) t.cat = tc[i] || 'admin'; });
   return {
     version: 1, onboarded: false, startKey: tk, xp: 0,
-    identities: ['I am someone who trains.', 'I am a doctor who keeps getting sharper.', 'I am a creator who ships, not scrolls.', 'I am someone who protects my sleep.'],
+    identities: ['I am someone who trains.', 'I am a doctor who keeps getting sharper.', 'I am a creator who ships, not scrolls.', 'I am someone who protects my sleep.', 'I am someone who stays grounded.', 'I am someone in control of my money.'],
+    cats: DEFAULT_CATS.map(c => Object.assign({}, c)),
     habits, loadouts,
     bad: [
       { id: 'b-scroll', name: 'Doomscrolling', invisible: 'Social apps off the home screen, in a folder on the last page', unattractive: 'Every scroll is a vote for average', difficult: 'Log out after each content block; grayscale after 21:00', unsatisfying: 'Log every urge here and look at screen time in the handover' },
@@ -501,6 +582,7 @@ function defaults() {
     settings: {
       theme: 'system', motion: 'system', mts: false, sound: true, rollover: 4, escalateDays: 5,
       contentStart: '19:00', contentEnd: '20:00', defaultLoadout: 'day',
+      excuses: DEFAULT_EXCUSES.slice(),
       chants: ['NOT. AVERAGE.', 'SHIFT. DONE.', 'NO. EXCUSES.', 'BETTER. THAN. YESTERDAY.'],
       lines: [
         'Most people wait to feel motivated. I act, and the motivation follows.',
@@ -529,6 +611,10 @@ function migrate(d) {
   if (!Array.isArray(d.bad)) d.bad = [];
   if (!Array.isArray(d.sessions)) d.sessions = [];
   if (!d.days || typeof d.days !== 'object') d.days = {};
+  if (!Array.isArray(d.cats) || !d.cats.length) d.cats = DEFAULT_CATS.map(c => Object.assign({}, c));
+  for (const c of DEFAULT_CATS) if (!d.cats.find(x => x.id === c.id)) d.cats.push(Object.assign({}, c));
+  for (const h of d.habits) if (!h.cat) h.cat = HCAT[h.id] || 'health';
+  for (const t of d.tasks) if (!t.cat) t.cat = 'admin';
   return d;
 }
 function load() {
@@ -556,6 +642,8 @@ function day(k = todayKey()) {
 }
 const loadoutId = rec => (rec && rec.loadout && S.loadouts[rec.loadout]) ? rec.loadout : (S.loadouts[S.settings.defaultLoadout] ? S.settings.defaultLoadout : 'day');
 const loadoutOf = rec => S.loadouts[loadoutId(rec)];
+const catById = id => S.cats.find(c => c.id === id) || S.cats.find(c => c.id === 'admin') || S.cats[0];
+const catSelect = (id, cur) => `<span class="sel"><select id="${id}">${S.cats.map(c => `<option value="${c.id}" ${c.id === cur ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select></span>`;
 const habitById = id => S.habits.find(h => h.id === id);
 const taskById = id => S.tasks.find(t => t.id === id);
 function loSlot(lo, h) { const s = lo.habits[h.id]; return s && s.t !== 'off' ? s : null; }
@@ -1016,9 +1104,10 @@ function vToday() {
   return `
   <section class="panel"><div class="ph"><b>BRIEF.SYS</b><span>${dateLong(k)} · ${st.cleared}/${st.targets} CLEARED</span></div><div class="pb">
     ${briefLine ? `<p class="line">${esc(briefLine)}</p>` : ''}
-    ${yho && (yho.a || yho.r) ? `<div class="stack small" style="box-shadow:inset 0 0 0 1.5px var(--line2);padding:10px">
-      <div class="label" style="margin:0">Handover from yesterday's you</div>
-      ${yho.a ? `<div><b>PRIORITISE:</b> ${esc(yho.a)}</div>` : ''}${yho.r ? `<div><b>WATCH FOR:</b> ${esc(yho.r)}</div>` : ''}</div>` : ''}
+    ${yho && (yho.fix || yho.a || yho.r || (yho.excuses || []).length) ? `<div class="stack small" style="box-shadow:inset 0 0 0 1.5px var(--line2);padding:10px">
+      <div class="label" style="margin:0">Last night you said</div>
+      ${yho.fix || yho.a ? `<div><b>TODAY I WILL:</b> ${esc(yho.fix || yho.a)}</div>` : ''}${yho.r ? `<div><b>WATCH FOR:</b> ${esc(yho.r)}</div>` : ''}
+      ${(yho.excuses || []).length ? `<div><b>EXCUSES ON FILE:</b> ${yho.excuses.map(esc).join(' · ')}. ${esc(fixFor(yho.excuses[0]))}</div>` : ''}</div>` : ''}
     <div><div class="label"><b>01</b> · Loadout ${rec.loadout ? '' : '· pick today\'s shift'}</div>
       <div class="chips">${LO_IDS.map(id => `<button class="chip ${rec.loadout === id ? 'on' : ''}" data-act="loadout" data-id="${id}">${esc(S.loadouts[id].name)}<small>${esc(S.loadouts[id].hours)}</small></button>`).join('')}</div></div>
     <div><div class="label"><b>02</b> · Highlight · the one thing that makes today a win</div>${hlBlock(rec, yho)}</div>
@@ -1031,6 +1120,11 @@ function vToday() {
       ${arrest ? `<span class="r"><b>${arrest}</b>PERI-ARREST</span>` : ''}
       <span class="${urgent ? 'r' : ''}"><b>${urgent}</b>urgent</span><span><b>${semi}</b>semi-urgent</span><span><b>${waiting}</b>in the waiting room</span>
     </button>
+  </div></section>
+
+  <section class="panel"><div class="ph"><b>WORLD.EXE</b><span>FIRST PERSON</span></div><div class="pb">
+    <p class="small mute">Walk your day. Every room is a part of your life; red figures are tasks, red targets are today's habits. Time only moves when you move.</p>
+    <button class="btn big" data-act="nav" data-v="world">ENTER THE WORLD</button>
   </div></section>
 
   <section class="panel"><div class="ph"><b>LASER.EXE</b><span>FOCUS MODE</span></div><div class="pb">
@@ -1061,7 +1155,8 @@ function hlBlock(rec, yho) {
     </div>`;
   }
   const open = S.tasks.filter(t => !t.done && t.level).sort((a, b) => news(b) - news(a)).slice(0, 3);
-  const sug = yho && yho.a ? `<button class="chip" data-act="hl-text" data-text="${esc(yho.a)}">${esc(yho.a)}<small>from handover</small></button>` : '';
+  const yt = yho && (yho.fix || yho.a);
+  const sug = yt ? `<button class="chip" data-act="hl-text" data-text="${esc(yt)}">${esc(yt)}<small>from last night</small></button>` : '';
   return `<form class="row" data-form="hl"><input id="hlIn" class="grow" maxlength="90" placeholder="e.g. Finish 2 CCRs before nights"><button class="btn">SET</button></form>
     ${sug || open.length ? `<div class="chips" style="margin-top:8px">${sug}${open.map(t => `<button class="chip" data-act="hl-task" data-id="${t.id}">${esc(t.title)}<small>${LV_NAME[t.level].toLowerCase()} · NEWS2 ${news(t)}</small></button>`).join('')}</div>` : ''}`;
 }
@@ -1076,6 +1171,7 @@ function taskCard(t, o = {}) {
     else meta.push(`<span class="${n >= 5 ? 'hot' : ''}">NEWS2 ${n}</span>`);
     if (t.deadline) meta.push(t.deadline < now ? `<span class="hot">overdue ${dur(now - t.deadline)}</span>` : `<span class="${t.deadline - now < 864e5 ? 'hot' : ''}">due ${dur(t.deadline - now)}</span>`);
     if (t.escalated) meta.push(`<span class="tag">auto-escalated</span>`);
+    meta.push(`<span>${esc(catById(t.cat).name)}</span>`);
     if (ar) meta.push(`<span class="peri">PERI-ARREST</span>`);
   }
   return `<div class="tcard ${levelClass(t)} ${ar ? 'arrest' : ''} ${t.done ? 'done' : ''}" data-id="${t.id}">
@@ -1098,7 +1194,7 @@ function vTriage() {
   <section class="panel"><div class="ph"><b>TRIAGE.EXE</b><span>${open.length} OPEN</span></div><div class="pb">
     <form class="stack" data-form="task">
       <div class="row"><input id="tIn" class="grow" maxlength="120" placeholder="Admit a new task…"><button class="btn">ADMIT</button></div>
-      <label class="field"><span>Deadline (optional; urgent deadlines fire a projectile)</span><input id="tDl" type="datetime-local"></label>
+      <div class="row"><label class="field grow"><span>Deadline (optional; urgent deadlines fire a projectile)</span><input id="tDl" type="datetime-local"></label><label class="field grow"><span>Room</span>${catSelect('tCat', 'admin')}</label></div>
     </form>
   </div></section>
 
@@ -1170,7 +1266,7 @@ function habitRow(h, rec, isNext, queued) {
     <div style="min-width:0">
       <div class="hn">${esc(h.name)}</div>
       ${h.cue ? `<div class="cue">${esc(h.cue)} → <b>${v.target === 'min' ? esc(lc(v.min)) : esc(lc(v.full))}</b></div>` : ''}
-      <div class="meta">${h.time ? `<span>${esc(h.time)}</span>` : ''}${h.loc ? `<span>${esc(h.loc)}</span>` : ''}
+      <div class="meta"><span>${esc(catById(h.cat).name)}</span>${h.time ? `<span>${esc(h.time)}</span>` : ''}${h.loc ? `<span>${esc(h.loc)}</span>` : ''}
         <span class="st">streak ${s.streak}</span>${s.best > s.streak ? `<span>best ${s.best}</span>` : ''}
         ${!mode && s.state === 'cracked' ? `<span class="warn">cracked · clear it to heal</span>` : ''}${!mode && s.state === 'shattered' ? `<span class="warn">shattered · restart</span>` : ''}
         ${s.healed ? `<span class="st">healed</span>` : ''}</div>
@@ -1222,6 +1318,7 @@ function vWeek() {
     <div class="wkstats"><div class="stat"><b>${cleared}</b><span>targets cleared</span></div><div class="stat"><b>${strongN}/7</b><span>strong days</span></div><div class="stat"><b>${xp}</b><span>XP earned</span></div></div>
     <div class="scroll-x"><table class="hg"><tr><th></th>${keys.map(k => `<th>${DOW[keyToDate(k).getDay()].charAt(0)}</th>`).join('')}</tr>
       ${S.habits.map(h => `<tr><th class="hn2" title="${esc(h.name)}">${esc(h.name)}</th>${keys.map(k => `<td>${cell(h, k)}</td>`).join('')}</tr>`).join('')}</table></div>
+    <div><div class="label">Excuse log this week</div>${(() => { const n = {}; keys.forEach(k => (((S.days[k] || {}).handover || {}).excuses || []).forEach(e => { n[e] = (n[e] || 0) + 1; })); const top = Object.entries(n).sort((a, b) => b[1] - a[1]); return top.length ? `<div class="chips">${top.map(([e, c]) => `<span class="chip">${esc(e)} ×${c}</span>`).join('')}</div><p class="small mute" style="margin-top:6px">Top excuse: ${esc(top[0][0])}. ${esc(fixFor(top[0][0]))}</p>` : '<div class="empty">No excuses logged this week</div>'; })()}</div>
     <div class="key"><span><span class="c full"></span>full</span><span><span class="c min"></span>2-min</span><span><span class="c miss">╳</span> missed</span><span><span class="c off">·</span> benched by loadout</span></div>
   </div></section>`;
 }
@@ -1261,40 +1358,63 @@ function vMonth() {
 }
 
 /* ---------- handover.txt ---------- */
-function autoHandover(k) {
-  const rec = day(k), st = dayStats(k), lo = loadoutOf(rec);
-  const dis = rec.log.filter(e => e.kind === 'task').length;
-  const sess = S.sessions.filter(s => s.date === k && s.completed);
-  const mins = Math.round(sess.reduce((a, s) => a + s.focused, 0) / 60000), cracks = sess.reduce((a, s) => a + s.cracks, 0);
-  const h = rec.highlight;
-  const s = `${lo.name}. Cleared ${st.cleared}/${st.targets} targets${st.min ? ` (${st.min} at the 2-min minimum)` : ''}. Highlight: ${h && h.text ? (h.done ? 'DONE, ' : 'NOT DONE, ') + h.text : 'none set'}. Discharged ${dis} task${dis === 1 ? '' : 's'}.${mins ? ` Laser ${mins} min${cracks ? `, ${cracks} crack${cracks > 1 ? 's' : ''}` : ''}.` : ''}${rec.urges ? ` Resisted ${rec.urges} urge${rec.urges > 1 ? 's' : ''}.` : ''}`;
-  const open = S.tasks.filter(t => !t.done && t.level).sort((a, b) => (isArrest(b) - isArrest(a)) || (news(b) - news(a))).slice(0, 5);
-  const b = open.length ? open.map(t => `[${isArrest(t) ? 'PERI-ARREST' : LV_NAME[t.level]}] ${t.title}${t.deadline ? ` (due ${t.deadline < Date.now() ? 'OVERDUE' : dur(t.deadline - Date.now())})` : ''}`).join('\n') : 'Nothing outstanding on the board.';
-  const missed = scheduled(rec).filter(x => !rec.habits[x.id]).map(x => x.name);
-  const a = open[0] ? open[0].title : '';
-  const r = missed.length ? `Missed today: ${missed.join(', ')}. Miss them again and the streak shatters; the 2-min version is enough.` : 'Clean sheet today. Protect sleep tonight.';
-  return { s, b, a, r };
+function didText(k) {
+  const rec = day(k);
+  const items = rec.log.filter(e => e.kind !== 'handover').slice().sort((a, b) => a.t - b.t);
+  if (!items.length) return '';
+  return items.map(e => `✓ ${e.label}`).join('\n');
 }
+function missedItems(k) {
+  const rec = day(k), out = [], seen = new Set();
+  const add = label => { if (!seen.has(label)) { seen.add(label); out.push(label); } };
+  if (rec.highlight && rec.highlight.text && !rec.highlight.done) add(`Highlight: ${rec.highlight.text}`);
+  scheduled(rec).filter(h => !rec.habits[h.id]).forEach(h => add(h.name));
+  rec.planned.map(taskById).filter(t => t && !t.done).forEach(t => add(t.title));
+  S.tasks.filter(isArrest).forEach(t => add(`${t.title} (PERI-ARREST)`));
+  return out;
+}
+const QA = (n, q, body) => `<div class="sbar"><span class="L">${n}</span><div style="min-width:0"><div class="label">${q}</div>${body}</div></div>`;
 function vHandover() {
   const k = todayKey(), rec = day(k), ho = rec.handover;
   if (rec.closed && ho && !ui.hoEdit) {
-    return `<section class="panel"><div class="ph"><b>HANDOVER.TXT</b><span>${dateLong(k)} · SUBMITTED ${hhmm(ho.t)}</span></div><div class="pb">
-      ${[['S', 'Situation', ho.s], ['B', 'Background', ho.b], ['A', 'Assessment', ho.a], ['R', 'Recommendation', ho.r]].map(([L, n, v]) => `<div class="sbar"><span class="L">${L}</span><div><div class="label">${n}</div><div class="sbar-read">${esc(v) || '<span class="mute">—</span>'}</div></div></div>`).join('')}
+    const legacy = ho.did === undefined;
+    const body = legacy
+      ? [['S', 'Situation', ho.s], ['B', 'Background', ho.b], ['A', 'Assessment', ho.a], ['R', 'Recommendation', ho.r]].map(([L, n, v]) => QA(L, n, `<div class="sbar-read">${esc(v) || '<span class="mute">—</span>'}</div>`)).join('')
+      : [
+        QA(1, 'What did I do today?', `<div class="sbar-read">${esc(ho.did) || '<span class="mute">—</span>'}</div>`),
+        QA(2, "What didn't I do that I should have?", `<div class="sbar-read">${esc([...(ho.missed || []), ho.missedOther].filter(Boolean).join('\n')) || 'Nothing. Clean sheet.'}</div>`),
+        QA(3, "Why wasn't it done?", `${(ho.excuses || []).length ? `<div class="chips">${ho.excuses.map(e => `<span class="chip pick ex on">${esc(e)}</span>`).join('')}</div>` : ''}${ho.why ? `<div class="sbar-read" style="margin-top:6px">${esc(ho.why)}</div>` : ''}${!(ho.excuses || []).length && !ho.why ? '<span class="mute">No excuses logged.</span>' : ''}
+          ${(ho.excuses || []).length ? `<ul class="fixes">${ho.excuses.map(e => `<li>${esc(fixFor(e))}</li>`).join('')}</ul>` : ''}`),
+        QA(4, 'Tomorrow I will', `<div class="sbar-read">${esc(ho.fix) || '<span class="mute">—</span>'}</div>`),
+      ].join('');
+    return `<section class="panel"><div class="ph"><b>HANDOVER.TXT</b><span>${dateLong(k)} · CLOSED ${hhmm(ho.t)}</span></div><div class="pb">
+      ${body}
       <div class="row"><button class="btn" data-act="replay" data-k="${k}">▶▶ REPLAY DAY</button><button class="btn ghost" data-act="ho-edit">EDIT</button></div>
     </div></section>`;
   }
-  const a = autoHandover(k), v = ho || a;
-  return `<section class="panel"><div class="ph"><b>HANDOVER.TXT</b><span>SBAR TO TOMORROW'S ME</span></div><div class="pb">
-    <p class="small mute">Pre-filled from today's record. Edit what matters, then hand over. Under a minute.</p>
-    <form class="stack" data-form="ho" style="gap:14px">
-      <div class="sbar"><span class="L">S</span><label class="field"><span><b>Situation</b> · what happened</span><textarea id="hoS" rows="3">${esc(v.s)}</textarea></label></div>
-      <div class="sbar"><span class="L">B</span><label class="field"><span><b>Background</b> · what's outstanding</span><textarea id="hoB" rows="4">${esc(v.b)}</textarea></label></div>
-      <div class="sbar"><span class="L">A</span><label class="field"><span><b>Assessment</b> · what to prioritise (becomes tomorrow's suggested Highlight)</span><input id="hoA" maxlength="90" value="${esc(v.a)}"></label></div>
-      <div class="sbar"><span class="L">R</span><label class="field"><span><b>Recommendation</b> · what to watch for</span><textarea id="hoR" rows="3">${esc(v.r)}</textarea></label></div>
-      <button class="btn big">HAND OVER · CLOSE THE DAY</button>
+  const v = ho && ho.did !== undefined ? ho : null;
+  const missed = missedItems(k);
+  const selMissed = v ? (v.missed || []) : missed.filter(m => !m.endsWith('(PERI-ARREST)'));
+  const allMissed = [...new Set([...missed, ...selMissed])];
+  const exSel = v ? (v.excuses || []) : [];
+  const did = v ? v.did : didText(k);
+  return `<section class="panel"><div class="ph"><b>HANDOVER.TXT</b><span>REFLECT · ${dateLong(k)}</span></div><div class="pb">
+    <p class="small mute">Four questions to tomorrow's you. Pre-filled from today's record; tap to change. Under a minute.</p>
+    <form class="stack" data-form="ho" style="gap:18px">
+      ${QA(1, 'What did I do today?', `<textarea id="hoDid" rows="${Math.min(8, Math.max(3, did.split('\n').length))}" placeholder="Nothing logged yet. Write what you did, even the small stuff.">${esc(did)}</textarea>`)}
+      ${QA(2, "What didn't I do that I should have?", `${allMissed.length ? `<div class="chips" id="hoMissed">${allMissed.map(m => `<button type="button" class="chip pick ${selMissed.includes(m) ? 'on' : ''}" data-act="ho-pick" data-v="${esc(m)}">${esc(m)}</button>`).join('')}</div>` : `<div class="empty">Every target cleared. Nothing missed.</div>`}
+        <input id="hoOther" style="margin-top:8px" maxlength="120" placeholder="Anything else I should have done?" value="${esc(v ? v.missedOther : '')}">`)}
+      ${QA(3, "Why wasn't it done?", `<div class="chips" id="hoEx">${S.settings.excuses.map(e => `<button type="button" class="chip pick ex ${exSel.includes(e) ? 'on' : ''}" data-act="ho-pick" data-grp="ex" data-v="${esc(e)}">${esc(e)}</button>`).join('')}</div>
+        <input id="hoWhy" style="margin-top:8px" maxlength="160" placeholder="Other reason, in my own words" value="${esc(v ? v.why : '')}">
+        <ul class="fixes" id="hoFixes">${exSel.map(e => `<li>${esc(fixFor(e))}</li>`).join('')}</ul>`)}
+      ${QA(4, 'What will I do differently tomorrow?', `<input id="hoFix" maxlength="90" placeholder="e.g. AKT 5 questions before I check my phone" value="${esc(v ? v.fix : '')}"><div class="small mute" style="margin-top:4px">Becomes tomorrow's suggested Highlight.</div>`)}
+      <button class="btn big">CLOSE THE DAY</button>
     </form>
-    ${ho ? '' : `<button class="link" data-act="ho-auto">refresh pre-fill from today's record</button>`}
   </div></section>`;
+}
+function updateFixes() {
+  const box = $('#hoFixes'); if (!box) return;
+  box.innerHTML = [...document.querySelectorAll('#hoEx .chip.on')].map(b => `<li>${esc(fixFor(b.dataset.v))}</li>`).join('');
 }
 
 /* ---------- settings.cfg ---------- */
@@ -1334,8 +1454,14 @@ function vSettings() {
 
   <section class="panel"><div class="ph"><b>LOADOUTS</b><span>HABITS PER SHIFT</span></div><div class="pb">${LO_IDS.map(loEditor).join('')}</div></section>
 
+  <section class="panel"><div class="ph"><b>WORLD ROOMS</b><span>CATEGORIES</span></div><div class="pb">
+    <p class="small mute">Each category is a room in world.exe. Rename them to fit your life.</p>
+    ${S.cats.map(c => `<div class="row"><label class="field grow"><span>Room</span><input data-cat="${c.id}" data-f="name" value="${esc(c.name)}" maxlength="24"></label><label class="field grow"><span>Subtitle</span><input data-cat="${c.id}" data-f="sub" value="${esc(c.sub)}" maxlength="40"></label></div>`).join('')}
+  </div></section>
+
   <section class="panel"><div class="ph"><b>WORDS</b><span>ONE PER LINE</span></div><div class="pb">
     <label class="field"><span>Identity statements</span><textarea rows="4" data-setting="identities" data-type="lines" data-root="1">${esc(S.identities.join('\n'))}</textarea></label>
+    <label class="field"><span>Excuses to pick from in the handover</span><textarea rows="4" data-setting="excuses" data-type="lines">${esc(st.excuses.join('\n'))}</textarea></label>
     <label class="field"><span>Chants (dots split the beats: NOT. AVERAGE.)</span><textarea rows="4" data-setting="chants" data-type="lines">${esc(st.chants.join('\n'))}</textarea></label>
     <label class="field"><span>Motivation lines</span><textarea rows="6" data-setting="lines" data-type="lines">${esc(st.lines.join('\n'))}</textarea></label>
   </div></section>
@@ -1365,6 +1491,7 @@ function mTask(t) {
   openModal('PATIENT NOTES', `
     <label class="field"><span>Task</span><input id="mtTitle" value="${esc(t.title)}" maxlength="120"></label>
     <div><div class="label">Triage level</div><div class="chips">${['routine', 'semi', 'urgent'].map(l => `<button class="chip ${t.level === l ? 'on' : ''}" data-act="t-level" data-id="${t.id}" data-lv="${l}" data-keep="1">${LV_NAME[l]}</button>`).join('')}</div></div>
+    <label class="field"><span>Room (category)</span>${catSelect('mtCat', t.cat)}</label>
     <label class="field"><span>Deadline</span><input id="mtDl" type="datetime-local" value="${toLocalInput(t.deadline)}"></label>
     <label class="field"><span>Notes</span><textarea id="mtNotes" rows="3">${esc(t.notes)}</textarea></label>
     <div class="small mute">NEWS2 ${news(t)} · admitted ${dateLong(fmtKey(new Date(t.created)))} · last reviewed ${dur(Date.now() - t.touched)} ago</div>
@@ -1389,7 +1516,7 @@ function mPlan() {
 }
 function mHabit(h) {
   const isNew = !h;
-  h = h || { id: '', routine: 'am', name: '', full: '', min: '', cue: '', time: '', loc: '', identity: 0, xp: 20 };
+  h = h || { id: '', cat: 'health', routine: 'am', name: '', full: '', min: '', cue: '', time: '', loc: '', identity: 0, xp: 20 };
   openModal(isNew ? 'NEW HABIT' : 'EDIT HABIT', `
     <label class="field"><span>Name</span><input id="mhName" value="${esc(h.name)}" maxlength="40" placeholder="e.g. Stretch"></label>
     <div class="row"><label class="field grow"><span>Routine</span><span class="sel"><select id="mhRoutine"><option value="am" ${h.routine === 'am' ? 'selected' : ''}>Level 1 · start</option><option value="pm" ${h.routine === 'pm' ? 'selected' : ''}>Level 2 · end</option></select></span></label>
@@ -1398,6 +1525,7 @@ function mHabit(h) {
     <label class="field"><span>2-minute minimum</span><input id="mhMin" value="${esc(h.min)}" placeholder="Roll out the mat"></label>
     <label class="field"><span>Habit stack cue · After I…</span><input id="mhCue" value="${esc(h.cue)}" placeholder="After I pour my coffee"></label>
     <div class="row"><label class="field grow"><span>Time</span><input id="mhTime" value="${esc(h.time)}" placeholder="07:00"></label><label class="field grow"><span>Location</span><input id="mhLoc" value="${esc(h.loc)}" placeholder="Kitchen"></label></div>
+    <label class="field"><span>Room (category)</span>${catSelect('mhCat', h.cat || 'health')}</label>
     <label class="field"><span>Votes for</span><span class="sel"><select id="mhId">${S.identities.map((s, i) => `<option value="${i}" ${+h.identity === i ? 'selected' : ''}>${esc(s)}</option>`).join('')}</select></span></label>
     ${isNew ? `<p class="small mute">New habits join every loadout as a full target. Adjust per shift in settings.cfg.</p>` : ''}
     <div class="row"><button class="btn" data-act="h-save" data-id="${h.id}">SAVE</button>${isNew ? '' : `<button class="btn ghost" data-act="h-delete" data-id="${h.id}">${ui.confirm === 'hdel-' + h.id ? 'TAP AGAIN TO DELETE' : 'DELETE'}</button>`}</div>`);
@@ -1420,7 +1548,7 @@ function mDay(k) {
   openModal(dateLong(k), `
     <div class="wkstats"><div class="stat"><b>${st.cleared}/${st.targets}</b><span>cleared</span></div><div class="stat"><b>${Math.round(st.score * 100)}%</b><span>${strong(st) ? 'strong day' : 'score'}</span></div><div class="stat"><b>${rec.log.reduce((a, e) => a + e.xp, 0)}</b><span>XP</span></div></div>
     <div class="small"><b>LOADOUT:</b> ${esc(loadoutOf(rec).name)}${rec.loadout ? '' : ' (default)'}<br><b>HIGHLIGHT:</b> ${rec.highlight && rec.highlight.text ? esc(rec.highlight.text) + (rec.highlight.done ? ' · DONE' : ' · not done') : '—'}</div>
-    ${ho ? `<div class="stack small">${[['S', ho.s], ['B', ho.b], ['A', ho.a], ['R', ho.r]].filter(x => x[1]).map(([L, v]) => `<div class="sbar" style="grid-template-columns:24px 1fr"><b class="h3">${L}</b><span class="sbar-read">${esc(v)}</span></div>`).join('')}</div>` : ''}
+    ${ho ? `<div class="stack small">${(ho.did !== undefined ? [['DID', ho.did], ['MISSED', [...(ho.missed || []), ho.missedOther].filter(Boolean).join(', ')], ['WHY', [...(ho.excuses || []), ho.why].filter(Boolean).join(', ')], ['NEXT', ho.fix]] : [['S', ho.s], ['B', ho.b], ['A', ho.a], ['R', ho.r]]).filter(x => x[1]).map(([L, v]) => `<div class="sbar" style="grid-template-columns:62px 1fr;gap:8px"><b class="h3">${L}</b><span class="sbar-read">${esc(v)}</span></div>`).join('')}</div>` : ''}
     <button class="btn" data-act="replay" data-k="${k}" ${rec.log.length ? '' : 'disabled'}>▶▶ REPLAY ${rec.log.length} CLEARS</button>`);
 }
 function mOnboard() {
@@ -1584,10 +1712,10 @@ function chant(k) {
 const rectOf = sel => { const e = typeof sel === 'string' ? $(sel) : sel; return e ? e.getBoundingClientRect() : null; };
 const lvColor = t => { const cs = getComputedStyle(document.documentElement); const v = isArrest(t) ? '--lv-arrest' : '--lv-' + (t.level || 'routine'); return cs.getPropertyValue(v).trim() || BG.col.red; };
 
-function addTask(title, deadline) {
+function addTask(title, deadline, cat) {
   title = String(title || '').trim(); if (!title) return;
   const now = Date.now();
-  S.tasks.push({ id: uid(), title, level: null, deadline: deadline || null, created: now, touched: now, done: null, doneKey: null, escalated: false, notes: '' });
+  S.tasks.push({ id: uid(), title, level: null, deadline: deadline || null, created: now, touched: now, done: null, doneKey: null, escalated: false, notes: '', cat: cat || 'admin' });
   save(); toast('Admitted to the waiting room. Triage it when you can.');
 }
 function setLevel(id, lv) {
@@ -1608,6 +1736,23 @@ function discharge(id, rect) {
     setTimeout(() => award('highlight', 'hl', `Highlight: ${rec.highlight.text}`, XP_HL, rectOf('#hlCard') || rect, 'HIGHLIGHT CLEARED · WIN SECURED'), 260);
   }
 }
+function doHabit(hid, m, rect) {
+  const h = habitById(hid), rec = day(); if (!h || rec.habits[h.id]) return false;
+  const mode = m === 'min' ? 'min' : 'full';
+  const healed = habitStreak(h).state === 'cracked';
+  rec.habits[h.id] = mode;
+  const xp = xpFor(h, mode), id = S.identities[h.identity];
+  award('habit', h.id, `${h.name}${mode === 'min' ? ' (2-min)' : ''}`, xp, rect, healed ? `CRACK HEALED · +${xp} XP` : `+${xp} XP · VOTE CAST: ${id || 'better than yesterday'}`);
+  const list = scheduled(rec).filter(x => x.routine === h.routine);
+  if (list.every(x => rec.habits[x.id])) setTimeout(() => { toast(`LEVEL ${h.routine === 'am' ? 1 : 2} CLEARED`); snap(); sfxGlass(1.4); }, 700);
+  return true;
+}
+function hlDone(rect) {
+  const rec = day(), h = rec.highlight; if (!h || h.done) return false;
+  if (h.taskId && taskById(h.taskId) && !taskById(h.taskId).done) discharge(h.taskId, rect);
+  else { h.done = true; award('highlight', 'hl', `Highlight: ${h.text}`, XP_HL, rect, 'HIGHLIGHT CLEARED · WIN SECURED'); }
+  return true;
+}
 function readmit(id) {
   const t = taskById(id); if (!t || !t.done) return;
   revoke('task', t.id, t.doneKey || todayKey());
@@ -1619,6 +1764,7 @@ function cmd(raw) {
   const low = s.toLowerCase().replace(/^[>\s]+/, '');
   const word = low.split(/\s+/)[0].replace(/\.(exe|log|map|txt|cfg|sys)$/, '');
   const alias = { today: 'today', brief: 'today', home: 'today', triage: 'triage', tasks: 'triage', habits: 'habits', week: 'week', month: 'month', handover: 'handover', reflect: 'handover', settings: 'settings', config: 'settings' };
+  if (word === 'world' && low.split(/\s+/).length === 1) { worldOpen(); return; }
   if (alias[word] && low.split(/\s+/).length === 1) { go(alias[word]); return; }
   if (word === 'laser') { const m = parseInt(low.split(/\s+/)[1], 10) || 25; const h = day().highlight; laserStart(clamp(m, 1, 180), h && h.text && !h.done ? h.text : 'Deep work'); return; }
   if (word === 'help' || word === '?') { toast('Commands: today · triage · habits · week · month · handover · settings · laser 25 · replay. Anything else is admitted as a task.', 6000); return; }
@@ -1627,19 +1773,20 @@ function cmd(raw) {
 }
 
 const ACT = {
-  nav: a => { closeModal(); go(a.dataset.v); },
+  nav: a => { closeModal(); if (a.dataset.v === 'world') worldOpen(); else go(a.dataset.v); },
+  'w-exit': () => worldClose(),
+  'w-close': () => wPanelClose(),
+  'w-dis': () => { const it = W.panelItem; if (!it) return; wPanelClose(); discharge(it.id, null); wShatterItem(it, true); wHud(); },
+  'w-tri': a => { const it = W.panelItem; if (!it) return; wPanelClose(); setLevel(it.id, a.dataset.lv); wRetriage(it); wHud(); },
+  'w-habit': a => { const it = W.panelItem; if (!it) return; wPanelClose(); if (doHabit(it.id, a.dataset.mode, null)) wClearTarget(it); wHud(); },
+  'w-hl': () => { const it = W.panelItem; if (!it) return; wPanelClose(); if (hlDone(null)) wClearTarget(it); wHud(); },
   'modal-close': () => { closeModal(); render(); },
   loadout: a => { const rec = day(); rec.loadout = a.dataset.id; save(); snap(); toast(`Loadout: ${S.loadouts[a.dataset.id].name}. Targets adjusted.`); render(); },
   'hl-text': a => { day().highlight = { text: a.dataset.text, taskId: null, done: false }; save(); snap(); render(); },
   'hl-task': a => { const t = taskById(a.dataset.id); if (!t) return; day().highlight = { text: t.title, taskId: t.id, done: false }; save(); snap(); render(); },
   'hl-clear': () => { day().highlight = null; save(); render(); },
-  'hl-done': () => {
-    const rec = day(), h = rec.highlight; if (!h || h.done) return;
-    const rect = rectOf('#hlCard');
-    if (h.taskId && taskById(h.taskId) && !taskById(h.taskId).done) discharge(h.taskId, rect);
-    else { h.done = true; award('highlight', 'hl', `Highlight: ${h.text}`, XP_HL, rect, 'HIGHLIGHT CLEARED · WIN SECURED'); }
-    render();
-  },
+  'hl-done': () => { hlDone(rectOf('#hlCard')); render(); },
+  'ho-pick': a => { a.classList.toggle('on'); vibrate(8); if (a.dataset.grp === 'ex') updateFixes(); },
   'hl-undo': () => {
     const rec = day(), h = rec.highlight; if (!h) return;
     h.done = false; revoke('highlight', 'hl');
@@ -1668,7 +1815,7 @@ const ACT = {
   't-readmit': a => { readmit(a.dataset.id); render(); },
   't-save': a => {
     const t = taskById(a.dataset.id); if (!t) return;
-    t.title = $('#mtTitle').value.trim() || t.title; t.notes = $('#mtNotes').value;
+    t.title = $('#mtTitle').value.trim() || t.title; t.notes = $('#mtNotes').value; t.cat = $('#mtCat').value;
     const dl = $('#mtDl').value; t.deadline = dl ? new Date(dl).getTime() : null;
     t.touched = Date.now(); save(); bgThreats(); closeModal(); toast('Reviewed. Deterioration score reset.'); render();
   },
@@ -1681,18 +1828,10 @@ const ACT = {
     save(); bgThreats(); closeModal(); render();
   },
   'h-do': a => {
-    const h = habitById(a.dataset.id), rec = day(); if (!h || rec.habits[h.id]) return;
-    const mode = a.dataset.mode === 'min' ? 'min' : 'full';
-    const row = $('#hab-' + h.id), rect = rectOf(row && row.querySelector('.target'));
-    const healed = habitStreak(h).state === 'cracked';
-    rec.habits[h.id] = mode;
-    const xp = xpFor(h, mode), id = S.identities[h.identity];
-    award('habit', h.id, `${h.name}${mode === 'min' ? ' (2-min)' : ''}`, xp, rect, healed ? `CRACK HEALED · +${xp} XP` : `+${xp} XP · VOTE CAST: ${id || 'better than yesterday'}`);
-    const list = scheduled(rec).filter(x => x.routine === h.routine);
-    if (list.every(x => rec.habits[x.id])) setTimeout(() => { toast(`LEVEL ${h.routine === 'am' ? 1 : 2} CLEARED`); snap(); sfxGlass(1.4); }, 700);
+    const row = $('#hab-' + a.dataset.id);
+    doHabit(a.dataset.id, a.dataset.mode, rectOf(row && row.querySelector('.target')));
     render();
-  },
-  'h-undo': a => { const rec = day(); delete rec.habits[a.dataset.id]; revoke('habit', a.dataset.id); render(); },
+  },  'h-undo': a => { const rec = day(); delete rec.habits[a.dataset.id]; revoke('habit', a.dataset.id); render(); },
   'edit-toggle': () => { ui.editHabits = !ui.editHabits; render(); },
   'h-new': () => mHabit(null),
   'h-edit': a => mHabit(habitById(a.dataset.id)),
@@ -1702,7 +1841,7 @@ const ACT = {
     let h = habitById(a.dataset.id);
     const isNew = !h;
     if (isNew) { h = { id: 'h-' + uid(), since: todayKey() }; S.habits.push(h); }
-    Object.assign(h, { name, routine: $('#mhRoutine').value, xp: clamp(+$('#mhXp').value || 20, 1, 100), full: $('#mhFull').value.trim() || name, min: $('#mhMin').value.trim() || 'Two minutes of it', cue: $('#mhCue').value.trim(), time: $('#mhTime').value.trim(), loc: $('#mhLoc').value.trim(), identity: +$('#mhId').value || 0 });
+    Object.assign(h, { name, routine: $('#mhRoutine').value, xp: clamp(+$('#mhXp').value || 20, 1, 100), full: $('#mhFull').value.trim() || name, min: $('#mhMin').value.trim() || 'Two minutes of it', cue: $('#mhCue').value.trim(), time: $('#mhTime').value.trim(), loc: $('#mhLoc').value.trim(), identity: +$('#mhId').value || 0, cat: $('#mhCat').value });
     if (isNew) for (const id of LO_IDS) S.loadouts[id].habits[h.id] = { t: 'full' };
     save(); closeModal(); render();
   },
@@ -1800,10 +1939,11 @@ document.addEventListener('submit', e => {
   if (f.id === 'prompt') { const v = $('#cmd').value; $('#cmd').value = ''; cmd(v); return; }
   const kind = f.dataset.form;
   if (kind === 'hl') { const v = $('#hlIn').value.trim(); if (!v) return; day().highlight = { text: v, taskId: null, done: false }; save(); snap(); render(); }
-  if (kind === 'task') { const v = $('#tIn').value, dl = $('#tDl').value; addTask(v, dl ? new Date(dl).getTime() : null); render(); setTimeout(() => { const i = $('#tIn'); i && i.focus(); }, 0); }
+  if (kind === 'task') { const v = $('#tIn').value, dl = $('#tDl').value; addTask(v, dl ? new Date(dl).getTime() : null, $('#tCat').value); render(); setTimeout(() => { const i = $('#tIn'); i && i.focus(); }, 0); }
   if (kind === 'ho') {
     const k = todayKey(), rec = day(k), first = !rec.closed;
-    rec.handover = { s: $('#hoS').value.trim(), b: $('#hoB').value.trim(), a: $('#hoA').value.trim(), r: $('#hoR').value.trim(), t: Date.now() };
+    const picked = sel => [...f.querySelectorAll(sel)].map(b => b.dataset.v);
+    rec.handover = { did: $('#hoDid').value.trim(), missed: picked('#hoMissed .chip.on'), missedOther: $('#hoOther').value.trim(), excuses: picked('#hoEx .chip.on'), why: $('#hoWhy').value.trim(), fix: $('#hoFix').value.trim(), t: Date.now() };
     rec.closed = true; ui.hoEdit = false;
     if (first && !rec.log.some(x => x.kind === 'handover')) { rec.log.push({ t: Date.now(), kind: 'handover', ref: 'ho', label: 'Handover to tomorrow', xp: XP_HANDOVER }); S.xp += XP_HANDOVER; }
     saveNow(); render();
@@ -1823,6 +1963,11 @@ document.addEventListener('change', e => {
     save(); toast('Saved.', 1200);
     if (k === 'rollover' || k === 'defaultLoadout') render();
     return;
+  }
+  if (el.dataset.cat) {
+    const c = S.cats.find(x => x.id === el.dataset.cat); if (!c) return;
+    const v = el.value.trim(); if (v || el.dataset.f === 'sub') c[el.dataset.f] = v;
+    save(); toast('Room saved.', 1200); return;
   }
   if (el.dataset.lo) {
     const lo = S.loadouts[el.dataset.lo], f = el.dataset.f;
@@ -1887,7 +2032,7 @@ const onSys = () => { applySettings(); };
 try { mqDark.addEventListener('change', onSys); mqRM.addEventListener('change', onSys); } catch (e) { mqDark.addListener && mqDark.addListener(onSys); }
 
 let curKey = '';
-const busy = () => modalOpen() || !$('#laser').hidden || drag || ['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName);
+const busy = () => W.on || modalOpen() || !$('#laser').hidden || drag || ['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName);
 function tickMinute() {
   const k = todayKey();
   const esc2 = escalate();
@@ -1940,6 +2085,442 @@ function afterBoot() {
     showLaser(); laserBack();
   }
 }
+
+/* =========================================================
+   WORLD.EXE: first-person walk through your rooms (three.js, lazy-loaded)
+   ========================================================= */
+const W = { on: false, T: null, r: null, scene: null, cam: null, items: [], parts: [], deco: [], rects: [], rooms: [], px: 0, pz: 8.6, yaw: 0, pitch: 0, keys: {}, joy: { x: 0, y: 0, id: null }, look: null, lookMoved: false, ts: 0.03, sim: 0, walk: 0, last: 0, raf: 0, hoverT: 0, hover: null, panelItem: null, ray: null, room: '' };
+const THREE_URL = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+const PR = 0.3, EYE = 1.6, WALL_H = 3.2;
+function loadThree() {
+  return new Promise((res, rej) => {
+    if (window.THREE) return res(window.THREE);
+    const sc = document.createElement('script');
+    sc.src = THREE_URL; sc.async = true;
+    sc.onload = () => window.THREE ? res(window.THREE) : rej(new Error('no THREE'));
+    sc.onerror = () => rej(new Error('load failed'));
+    document.head.appendChild(sc);
+  });
+}
+async function worldOpen() {
+  closeModal();
+  const ov = $('#world'), ld = $('#wLoad');
+  ov.hidden = false; ld.hidden = false; ld.innerHTML = 'LOADING WORLD…'; document.body.classList.add('in-world');
+  wPanelClose();
+  try { W.T = await loadThree(); }
+  catch (e) { ld.innerHTML = `WORLD.EXE NEEDS A SIGNAL<small>It downloads its 3D engine the first time. Connect and try again.</small><br><button class="btn" data-act="w-exit">BACK</button>`; return; }
+  try { if (!W.r) W.r = new W.T.WebGLRenderer({ canvas: $('#wcv'), antialias: true }); }
+  catch (e) { ld.innerHTML = `3D IS NOT AVAILABLE ON THIS DEVICE<small>WebGL is switched off or unsupported.</small><br><button class="btn" data-act="w-exit">BACK</button>`; return; }
+  W.r.setPixelRatio(Math.min(1.5, window.devicePixelRatio || 1));
+  W.on = true; cancelAnimationFrame(BG.raf);
+  wBuild(); wResize(); wHud();
+  ld.hidden = true; W.last = 0; W.ts = 1;
+  W.raf = requestAnimationFrame(wLoop);
+  toast(matchMedia('(pointer:coarse)').matches ? 'Left pad to walk, drag to look, tap a figure or target.' : 'WASD to walk, drag to look, click a figure or target.', 3200);
+}
+function worldClose() {
+  if (!$('#world').hidden) { W.on = false; cancelAnimationFrame(W.raf); $('#world').hidden = true; }
+  document.body.classList.remove('in-world');
+  W.keys = {}; W.joy.x = W.joy.y = 0; wPanelClose(); wDispose(); bgStart(); render();
+}
+function wDispose() {
+  if (!W.scene) return;
+  W.scene.traverse(o => {
+    if (o.geometry) o.geometry.dispose();
+    const ms = Array.isArray(o.material) ? o.material : (o.material ? [o.material] : []);
+    ms.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
+  });
+  W.scene = null; W.items = []; W.parts = []; W.deco = [];
+}
+function wResize() {
+  if (!W.r || !W.cam) return;
+  W.r.setSize(innerWidth, innerHeight, false);
+  W.cam.aspect = innerWidth / innerHeight; W.cam.updateProjectionMatrix();
+}
+function wCol(str) {
+  const T = W.T, m = String(str).match(/rgba?\(([^)]+)\)/);
+  if (m) { const p = m[1].split(',').map(parseFloat); return new T.Color(p[0] / 255, p[1] / 255, p[2] / 255); }
+  return new T.Color(String(str).trim() || '#888');
+}
+function wColors() {
+  const cs = getComputedStyle(document.documentElement), g = n => cs.getPropertyValue(n).trim();
+  const dark = (parseFloat(g('--shard-a')) || 1) < 1;
+  return { dark, bg: g('--bg'), wall: dark ? '#151515' : '#f6f6f4', floor: dark ? '#0a0a0a' : '#d8d7d3', edge: dark ? '#f2f2f0' : '#8f8e8a', ink: g('--ink'), panel: g('--panel-solid'), mute: g('--mute'), red: g('--red'), routine: g('--lv-routine'), semi: g('--lv-semi'), urgent: g('--lv-urgent'), arrest: g('--lv-arrest') };
+}
+/* Canvas text → texture. Used for wall signs and floating labels. */
+function wTextCanvas(lines, w, h, o = {}) {
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const x = cv.getContext('2d'), C = W.C;
+  if (o.bg !== false) { x.fillStyle = o.bg || C.panel; x.fillRect(0, 0, w, h); }
+  if (o.bar) { x.fillStyle = o.bar; x.fillRect(0, 0, w, Math.max(6, h * 0.06)); }
+  let y = o.pad || h * 0.12;
+  lines.forEach((ln, i) => {
+    if (!ln) return;
+    const big = i === 0, size = big ? (o.big || h * 0.42) : (o.small || h * 0.17);
+    x.font = big ? `${size}px Anton, Impact, 'Arial Narrow Bold', sans-serif` : `600 ${size}px 'IBM Plex Mono', ui-monospace, monospace`;
+    x.fillStyle = i === 0 ? (o.color || C.ink) : (o.sub || C.mute);
+    x.textBaseline = 'top'; x.textAlign = o.align || 'left';
+    let t = big ? String(ln).toUpperCase() : String(ln);
+    const maxW = w - (o.padX || 24) * 2;
+    while (x.measureText(t).width > maxW && t.length > 3) t = t.slice(0, -2).trimEnd() + '…';
+    while (x.measureText(t).width > maxW && t.length > 1) t = t.slice(0, -1);
+    x.fillText(t, o.align === 'center' ? w / 2 : (o.padX || 24), y);
+    y += size * (big ? 1.08 : 1.35);
+  });
+  return cv;
+}
+function wSign(lines, w, h, o) {
+  const T = W.T, cv = wTextCanvas(lines, 1024, Math.round(1024 * h / w), Object.assign({ bar: W.C.ink, padX: 40 }, o));
+  const tex = new T.CanvasTexture(cv); tex.anisotropy = 4;
+  return new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ map: tex, transparent: true }));
+}
+function wLabel(lines, o = {}) {
+  const T = W.T, cv = wTextCanvas(lines, 512, lines.length > 1 && lines[1] ? 150 : 92, Object.assign({ big: 52, small: 24, pad: 14, padX: 18, align: 'center', bar: o.bar || W.C.ink }, o));
+  const tex = new T.CanvasTexture(cv);
+  const sp = new T.Sprite(new T.SpriteMaterial({ map: tex, transparent: true, fog: true }));
+  const sw = 1.5; sp.scale.set(sw, sw * cv.height / cv.width, 1);
+  return sp;
+}
+function wFigure(t) {
+  const T = W.T, C = W.C, lv = t.level, ar = isArrest(t);
+  let mat;
+  if (!lv) mat = new T.MeshBasicMaterial({ color: wCol(C.mute), wireframe: true });
+  else if (lv === 'routine') mat = new T.MeshBasicMaterial({ color: wCol(C.routine), wireframe: true, transparent: true, opacity: 0.85 });
+  else if (lv === 'semi') mat = new T.MeshPhongMaterial({ color: wCol(C.semi), flatShading: true, shininess: 10 });
+  else mat = new T.MeshPhongMaterial({ color: wCol(ar ? C.arrest : C.urgent), emissive: wCol(ar ? C.arrest : C.urgent), emissiveIntensity: 0.45, flatShading: true, shininess: 40 });
+  const g = new T.Group();
+  const part = (geo, x, y, z, rz = 0) => { const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.z = rz; g.add(m); return m; };
+  part(new T.IcosahedronGeometry(0.2, 0), 0, 1.66, 0);
+  part(new T.CylinderGeometry(0.27, 0.17, 0.72, 5), 0, 1.15, 0);
+  part(new T.CylinderGeometry(0.17, 0.2, 0.16, 5), 0, 0.74, 0);
+  part(new T.BoxGeometry(0.11, 0.66, 0.13), -0.37, 1.13, 0, 0.16);
+  part(new T.BoxGeometry(0.11, 0.66, 0.13), 0.37, 1.13, 0, -0.16);
+  part(new T.BoxGeometry(0.14, 0.74, 0.16), -0.1, 0.37, 0);
+  part(new T.BoxGeometry(0.14, 0.74, 0.16), 0.1, 0.37, 0);
+  if (lv === 'urgent') {
+    const fr = new T.LineBasicMaterial({ color: wCol(C.wall) });
+    const pts = [[-0.1, 1.5, 0.2], [0.05, 1.3, 0.24], [-0.06, 1.1, 0.24], [0.08, 0.9, 0.2]].map(p => new T.Vector3(...p));
+    g.add(new T.Line(new T.BufferGeometry().setFromPoints(pts), fr));
+  }
+  return g;
+}
+function wTargetGem(cleared) {
+  const T = W.T, C = W.C;
+  const mat = cleared ? new T.MeshBasicMaterial({ color: wCol(C.edge), wireframe: true }) : new T.MeshPhongMaterial({ color: wCol(C.red), flatShading: true, shininess: 60, emissive: wCol(C.red), emissiveIntensity: 0.12 });
+  return new T.Mesh(new T.OctahedronGeometry(0.3, 0), mat);
+}
+function wInside(x, z) { return W.rects.some(r => x >= r.x1 + PR && x <= r.x2 - PR && z >= r.z1 + PR && z <= r.z2 - PR); }
+function wBuild() {
+  const T = W.T; wDispose();
+  const C = W.C = wColors();
+  const sc = W.scene = new T.Scene();
+  sc.background = wCol(C.bg); sc.fog = new T.Fog(wCol(C.bg), 7, C.dark ? 24 : 30);
+  W.cam = new T.PerspectiveCamera(72, innerWidth / innerHeight, 0.05, 80); W.cam.rotation.order = 'YXZ';
+  W.ray = new T.Raycaster();
+  sc.add(new T.HemisphereLight(0xffffff, C.dark ? 0x1a1a1a : 0xb4b2ac, C.dark ? 0.55 : 0.85));
+  const dl = new T.DirectionalLight(0xffffff, C.dark ? 0.55 : 0.55); dl.position.set(4, 10, 6); sc.add(dl);
+  const M = { wall: new T.MeshLambertMaterial({ color: wCol(C.wall) }), floor: new T.MeshLambertMaterial({ color: wCol(C.floor) }), edge: new T.LineBasicMaterial({ color: wCol(C.edge), transparent: true, opacity: C.dark ? 0.4 : 0.55 }) };
+  const box = (x1, z1, x2, z2, h, y0 = 0, mat = M.wall) => {
+    const w = Math.max(0.2, Math.abs(x2 - x1)), d = Math.max(0.2, Math.abs(z2 - z1));
+    const geo = new T.BoxGeometry(w, h, d), m = new T.Mesh(geo, mat);
+    m.position.set((x1 + x2) / 2, y0 + h / 2, (z1 + z2) / 2); sc.add(m);
+    const e = new T.LineSegments(new T.EdgesGeometry(geo), M.edge); e.position.copy(m.position); sc.add(e);
+    return m;
+  };
+  const wallZ = (x, za, zb, gaps = []) => { let cur = za; gaps.slice().sort((a, b) => a[0] - b[0]).forEach(([a, b]) => { if (a > cur) box(x, cur, x, a, WALL_H); cur = b; }); if (zb > cur) box(x, cur, x, zb, WALL_H); };
+  const wallX = (z, xa, xb, gaps = []) => { let cur = xa; gaps.slice().sort((a, b) => a[0] - b[0]).forEach(([a, b]) => { if (a > cur) box(cur, z, a, z, WALL_H); cur = b; }); if (xb > cur) box(cur, z, xb, z, WALL_H); };
+  const cats = S.cats, rows = Math.ceil(cats.length / 2), zEnd = -rows * 10;
+  // floor + grid
+  const depth = 12 - zEnd, fl = new T.Mesh(new T.PlaneGeometry(26, depth), M.floor);
+  fl.rotation.x = -Math.PI / 2; fl.position.set(0, 0, 11 - depth / 2); sc.add(fl);
+  const grid = new T.GridHelper(Math.max(26, depth), Math.round(Math.max(26, depth) / 2), wCol(C.edge), wCol(C.edge));
+  grid.material.transparent = true; grid.material.opacity = C.dark ? 0.12 : 0.2; grid.position.set(0, 0.002, 11 - depth / 2); sc.add(grid);
+  // hub: the waiting room
+  W.rects = [{ x1: -6, x2: 6, z1: 0, z2: 10 }, { x1: -2, x2: 2, z1: zEnd, z2: 1 }];
+  W.rooms = [{ name: 'The Waiting Room', sub: 'triage new arrivals · today\'s Highlight', rect: W.rects[0] }, { name: 'Corridor', sub: 'pick a room', rect: W.rects[1] }];
+  wallX(10, -6, 6); wallZ(-6, 0, 10); wallZ(6, 0, 10); wallX(0, -6, 6, [[-2, 2]]);
+  const open = S.tasks.filter(t => !t.done);
+  const unassessed = open.filter(t => !t.level);
+  let sg = wSign(['Triage OS', 'Discipline World · time moves only when you move'], 6, 1.3); sg.position.set(0, 2.25, 9.88); sg.rotation.y = Math.PI; sc.add(sg);
+  sg = wSign(['Waiting room', `${unassessed.length} unassessed · tap one to triage`], 4.4, 1.1); sg.position.set(-5.88, 2.3, 5); sg.rotation.y = Math.PI / 2; sc.add(sg);
+  // corridor + rooms
+  const gaps = { '-1': [], '1': [] };
+  const rec = day(), hs = scheduled(rec);
+  cats.forEach((cat, i) => {
+    const r = Math.floor(i / 2), sd = i % 2 === 0 ? -1 : 1, c = -r * 10 - 5, top = -r * 10, bot = top - 10;
+    gaps[sd].push([c - 1.3, c + 1.3]);
+    const xa = Math.min(sd * 2, sd * 12), xb = Math.max(sd * 2, sd * 12);
+    wallZ(sd * 12, bot, top);
+    if (r === 0) wallX(top, xa, xb);
+    wallX(bot, xa, xb);
+    const rect = { x1: xa, x2: xb, z1: bot, z2: top };
+    W.rects.push(rect, { x1: sd < 0 ? -2.6 : 1.4, x2: sd < 0 ? -1.4 : 2.6, z1: c - 1.3, z2: c + 1.3 });
+    const ctasks = open.filter(t => t.level && (t.cat || 'admin') === cat.id).sort((a, b) => (isArrest(b) - isArrest(a)) || (news(b) - news(a)));
+    const chabits = hs.filter(h => (h.cat || 'health') === cat.id);
+    const done = chabits.filter(h => rec.habits[h.id]).length;
+    W.rooms.push({ name: cat.name, sub: `${ctasks.length} threat${ctasks.length === 1 ? '' : 's'} · ${done}/${chabits.length} targets`, rect });
+    const clear = !ctasks.length && done === chabits.length;
+    sg = wSign([cat.name, clear ? 'ROOM CLEAR' : `${ctasks.length} threats · ${done}/${chabits.length} targets`], 2.6, 0.86, clear ? {} : { sub: C.red });
+    sg.position.set(sd * 1.88, 2.55, c); sg.rotation.y = -sd * Math.PI / 2; sc.add(sg);
+    sg = wSign([cat.name, cat.sub || ''], 4.6, 1.2); sg.position.set(sd * 11.88, 2.3, c); sg.rotation.y = -sd * Math.PI / 2; sc.add(sg);
+    // habit targets on plinths along the back wall
+    const hn = Math.min(6, chabits.length);
+    chabits.slice(0, 6).forEach((h, j) => {
+      const z = c - 4 + (j + 0.5) * 8 / hn, x = sd * 11.1;
+      wAddTarget({ kind: 'habit', id: h.id, cleared: !!rec.habits[h.id], x, z, label: wHabitLabel(h, rec) });
+    });
+    // task figures on a grid in the middle of the room
+    ctasks.slice(0, 9).forEach((t, j) => {
+      const col = j % 3, row = Math.floor(j / 3);
+      wAddTask(t, sd * (5.3 + col * 1.8), c - 3.2 + row * 3.2, rect);
+    });
+    if (ctasks.length > 9) { sg = wSign([`+${ctasks.length - 9} more`, 'see triage.exe'], 2, 0.6); sg.position.set(sd * 6, 2.6, bot + 0.12); sc.add(sg); }
+  });
+  wallZ(-2, zEnd, 0, gaps['-1']); wallZ(2, zEnd, 0, gaps['1']); wallX(zEnd, -2, 2);
+  // hub contents: the Highlight and unassessed figures
+  const hl = rec.highlight;
+  if (hl && hl.text) wAddTarget({ kind: 'hl', id: 'hl', cleared: !!hl.done, x: 0, z: 4.6, label: ['Highlight', hl.done ? 'WIN SECURED' : hl.text], big: true });
+  const slots = [[-4, 7.5], [-4, 5], [-4, 2.5], [4, 7.5], [4, 5], [4, 2.5], [-2.4, 8.6], [2.4, 8.6]];
+  unassessed.slice(0, slots.length).forEach((t, j) => wAddTask(t, slots[j][0], slots[j][1], W.rects[0]));
+  // frozen shards hanging in the air
+  const shardMat = new T.MeshLambertMaterial({ color: wCol(C.dark ? '#3a3a3a' : '#ffffff') });
+  const Rn = rng(99);
+  for (let i = 0; i < 34; i++) {
+    const m = new T.Mesh(new T.TetrahedronGeometry(0.08 + Rn() * 0.22, 0), shardMat);
+    const rr = W.rects[Math.floor(Rn() * W.rects.length)];
+    m.position.set(rr.x1 + 0.5 + Rn() * (rr.x2 - rr.x1 - 1), 2.2 + Rn() * 0.9, rr.z1 + 0.5 + Rn() * (rr.z2 - rr.z1 - 1));
+    m.rotation.set(Rn() * 6, Rn() * 6, Rn() * 6);
+    m.userData.v = [(Rn() - 0.5) * 0.6, (Rn() - 0.5) * 0.6];
+    sc.add(m); W.deco.push(m);
+  }
+  // spawn in the waiting room facing the corridor
+  W.px = 0; W.pz = 8.6; W.yaw = 0; W.pitch = -0.05;
+}
+function wHabitLabel(h, rec) {
+  const m = rec.habits[h.id], st = habitStreak(h);
+  return [h.name, m ? `CLEARED · ${m === 'full' ? 'FULL' : '2-MIN'}` : st.state === 'cracked' ? 'CRACKED · CLEAR TO HEAL' : `FULL +${xpFor(h, 'full')} · 2-MIN +${xpFor(h, 'min')}`];
+}
+function wAddTask(t, x, z, bounds) {
+  const g = wFigure(t);
+  g.position.set(x, 0, z); g.rotation.y = (hash(t.id) % 628) / 100;
+  const lab = wLabel([t.title, t.level ? `${isArrest(t) ? 'PERI-ARREST' : LV_NAME[t.level]} · NEWS2 ${news(t)}` : 'UNASSESSED · TAP TO TRIAGE'], { bar: t.level ? W.C.red : W.C.ink });
+  lab.position.set(0, 2.18, 0); g.add(lab);
+  const it = { kind: 'task', id: t.id, g, level: t.level, bounds, ph: Math.random() * 6 };
+  g.userData.item = it; W.scene.add(g); W.items.push(it);
+  return it;
+}
+function wAddTarget(o) {
+  const T = W.T, g = new T.Group();
+  const pl = new T.Mesh(new T.CylinderGeometry(0.38, 0.44, 1, 6), new T.MeshLambertMaterial({ color: wCol(W.C.wall) }));
+  pl.position.y = 0.5; g.add(pl);
+  const pe = new T.LineSegments(new T.EdgesGeometry(pl.geometry), new T.LineBasicMaterial({ color: wCol(W.C.edge), transparent: true, opacity: 0.6 }));
+  pe.position.copy(pl.position); g.add(pe);
+  const gem = wTargetGem(o.cleared); gem.position.y = 1.5; if (o.big) gem.scale.setScalar(1.6); g.add(gem);
+  const lab = wLabel(o.label, { bar: o.cleared ? W.C.ink : W.C.red }); lab.position.set(0, o.big ? 2.45 : 2.2, 0); g.add(lab);
+  g.position.set(o.x, 0, o.z);
+  const it = { kind: o.kind, id: o.id, g, gem, lab, cleared: o.cleared, big: o.big, ph: Math.random() * 6 };
+  g.userData.item = it; W.scene.add(g); W.items.push(it);
+  return it;
+}
+function wItemFrom(obj) { while (obj) { if (obj.userData && obj.userData.item) return obj.userData.item; obj = obj.parent; } return null; }
+function wPick(nx, ny) {
+  const T = W.T;
+  W.ray.setFromCamera(new T.Vector2(nx, ny), W.cam);
+  const hits = W.ray.intersectObjects(W.items.filter(i => !i.dead).map(i => i.g), true);
+  for (const h of hits) { const it = wItemFrom(h.object); if (it && !it.dead) return { it, d: h.distance }; }
+  return null;
+}
+function wTap(cx, cy) {
+  const p = wPick(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1);
+  if (p) wInteract(p.it, p.d);
+}
+function wInteract(it, d) {
+  if (!it || it.dead) return;
+  if (d > 7) { toast('Get closer.'); return; }
+  W.panelItem = it;
+  let html = '';
+  if (it.kind === 'task') {
+    const t = taskById(it.id); if (!t || t.done) return;
+    const due = t.deadline ? (t.deadline < Date.now() ? ` · overdue ${dur(Date.now() - t.deadline)}` : ` · due ${dur(t.deadline - Date.now())}`) : '';
+    html = `<div class="h2">${esc(t.title)}</div><div class="small mute">${t.level ? (isArrest(t) ? 'PERI-ARREST' : LV_NAME[t.level]) : 'UNASSESSED'} · NEWS2 ${news(t)}${due} · ${esc(catById(t.cat).name)}</div>
+      ${t.level ? `<div class="row"><button class="btn threat" data-act="w-dis">DISCHARGE +${XP_TASK[t.level]}</button><button class="btn ghost" data-act="w-close">LEAVE IT</button></div>`
+        : `<div class="small">Triage this arrival. It will be waiting in the ${esc(catById(t.cat).name)} room next time you enter.</div><div class="row">${['routine', 'semi', 'urgent'].map(l => `<button class="btn ghost sm" data-act="w-tri" data-lv="${l}">${LV_NAME[l]}</button>`).join('')}</div><button class="link" data-act="w-close">not now</button>`}`;
+  } else if (it.kind === 'habit') {
+    const h = habitById(it.id); if (!h) return;
+    const rec = day(), v = versions(h, rec), m = rec.habits[h.id];
+    html = `<div class="h2">${esc(h.name)}</div>${h.cue ? `<div class="small mute">${esc(h.cue)} → ${esc(lc(v.target === 'min' ? v.min : v.full))}</div>` : ''}
+      ${m ? `<div class="cleared-stamp">CLEARED · ${m === 'full' ? 'FULL' : '2-MIN'}</div><button class="btn ghost" data-act="w-close">CLOSE</button>`
+        : `<div class="small">FULL: ${esc(v.full)}<br>2-MIN: ${esc(v.min)}</div><div class="row"><button class="btn ${v.target === 'full' ? 'threat' : 'ghost'}" data-act="w-habit" data-mode="full">FULL +${xpFor(h, 'full')}</button><button class="btn ${v.target === 'min' ? 'threat' : 'ghost'}" data-act="w-habit" data-mode="min">2-MIN +${xpFor(h, 'min')}</button></div><button class="link" data-act="w-close">not yet</button>`}`;
+  } else if (it.kind === 'hl') {
+    const h = day().highlight; if (!h) return;
+    html = `<div class="label">Today's Highlight</div><div class="h2">${esc(h.text)}</div>${h.done ? `<div class="cleared-stamp">WIN SECURED</div><button class="btn ghost" data-act="w-close">CLOSE</button>` : `<div class="row"><button class="btn threat" data-act="w-hl">CLEARED +${XP_HL}</button><button class="btn ghost" data-act="w-close">NOT YET</button></div>`}`;
+  }
+  const pnl = $('#wPanel'); pnl.innerHTML = html; pnl.hidden = false; $('#world').classList.add('panel-open');
+  W.joy.x = W.joy.y = 0; W.keys = {};
+}
+function wPanelClose() { const p = $('#wPanel'); if (p) { p.hidden = true; p.innerHTML = ''; } $('#world').classList.remove('panel-open'); W.panelItem = null; }
+function wShards(pos, colors, n = 30) {
+  const T = W.T;
+  for (let i = 0; i < n; i++) {
+    const m = new T.Mesh(new T.TetrahedronGeometry(0.05 + Math.random() * 0.1, 0), new T.MeshBasicMaterial({ color: wCol(colors[i % colors.length]), transparent: true }));
+    m.position.set(pos.x + (Math.random() - 0.5) * 0.5, pos.y + (Math.random() - 0.5) * 0.9, pos.z + (Math.random() - 0.5) * 0.5);
+    m.userData = { v: new T.Vector3((Math.random() - 0.5) * 5, Math.random() * 4 + 1, (Math.random() - 0.5) * 5), s: new T.Vector3(Math.random() * 10, Math.random() * 10, 0), life: 1.3 + Math.random() * 0.5, age: 0 };
+    W.scene.add(m); W.parts.push(m);
+  }
+  W.ts = 1;
+}
+function wShatterItem(it) {
+  if (!it || it.dead) return;
+  it.dead = true;
+  const p = it.g.position.clone(); p.y = 1.1;
+  const col = it.level === 'urgent' ? W.C.urgent : it.level === 'semi' ? W.C.semi : W.C.routine;
+  wShards(p, [col, col, W.C.wall], 36);
+  W.scene.remove(it.g);
+}
+function wClearTarget(it) {
+  if (!it || it.cleared) return;
+  const p = it.g.position.clone(); p.y = 1.5;
+  wShards(p, [W.C.red, W.C.red, W.C.wall], 26);
+  it.g.remove(it.gem); it.gem.geometry.dispose(); it.gem.material.dispose();
+  it.gem = wTargetGem(true); it.gem.position.y = 1.5; if (it.big) it.gem.scale.setScalar(1.6); it.g.add(it.gem);
+  it.g.remove(it.lab); it.lab.material.map.dispose(); it.lab.material.dispose();
+  const rec = day();
+  const label = it.kind === 'hl' ? ['Highlight', 'WIN SECURED'] : wHabitLabel(habitById(it.id), rec);
+  it.lab = wLabel(label, { bar: W.C.ink }); it.lab.position.set(0, it.big ? 2.45 : 2.2, 0); it.g.add(it.lab);
+  it.cleared = true;
+}
+function wRetriage(it) {
+  const t = taskById(it.id); if (!t) return;
+  const pos = it.g.position.clone();
+  it.dead = true; W.scene.remove(it.g);
+  wShards(new W.T.Vector3(pos.x, 1.1, pos.z), [W.C.mute, W.C.wall], 14);
+  wAddTask(t, pos.x, pos.z, it.bounds);
+}
+function wHud() {
+  const l = lvl(S.xp);
+  $('#wXp').innerHTML = `LV ${l.L} · ${esc(rankOf(l.L))}<br>${S.xp} XP`;
+}
+const angDiff = (a, b) => { let d = (a - b) % (Math.PI * 2); if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2; return d; };
+function wLoop(t) {
+  if (!W.on) return;
+  const dt = W.last ? Math.min(0.05, (t - W.last) / 1000) : 0.016; W.last = t;
+  // movement
+  const k = W.keys;
+  let mx = ((k.d || k.arrowright) ? 1 : 0) - ((k.a || k.arrowleft) ? 1 : 0) + W.joy.x;
+  let mz = ((k.w || k.arrowup) ? 1 : 0) - ((k.s || k.arrowdown) ? 1 : 0) - W.joy.y;
+  const len = Math.hypot(mx, mz); if (len > 1) { mx /= len; mz /= len; }
+  const sp = 3.4 * dt, sy = Math.sin(W.yaw), cy = Math.cos(W.yaw);
+  const dx = (mx * cy - mz * sy) * sp, dz = (-mx * sy - mz * cy) * sp;
+  if (dx || dz) {
+    const ok = (x, z) => wInside(x, z) && !W.items.some(it => !it.dead && Math.hypot(it.g.position.x - x, it.g.position.z - z) < (it.kind === 'task' ? 0.6 : 0.75));
+    if (ok(W.px + dx, W.pz + dz)) { W.px += dx; W.pz += dz; }
+    else if (ok(W.px + dx, W.pz)) W.px += dx;
+    else if (ok(W.px, W.pz + dz)) W.pz += dz;
+  }
+  // time only moves when you move
+  const moving = len > 0.05;
+  const target = moving ? 1 : (W.lookMoved ? 0.3 : 0.03);
+  W.lookMoved = false;
+  W.ts += (target - W.ts) * Math.min(1, dt * (target > W.ts ? 10 : 3));
+  const sdt = dt * W.ts; W.sim += sdt;
+  if (moving) W.walk += dt * Math.min(1, len);
+  for (const it of W.items) {
+    if (it.dead) continue;
+    if (it.kind === 'task') {
+      const g = it.g, ddx = W.px - g.position.x, ddz = W.pz - g.position.z, d = Math.hypot(ddx, ddz);
+      if (it.level === 'semi' || it.level === 'urgent') g.rotation.y += angDiff(Math.atan2(ddx, ddz), g.rotation.y) * Math.min(1, sdt * (it.level === 'urgent' ? 3 : 1.2));
+      if (it.level === 'urgent') {
+        const b = it.bounds;
+        if (d > 1.8 && d < 11 && W.px > b.x1 && W.px < b.x2 && W.pz > b.z1 && W.pz < b.z2) {
+          const st = Math.min(d - 1.8, sdt * 0.7);
+          g.position.x = clamp(g.position.x + ddx / d * st, b.x1 + 0.6, b.x2 - 0.6);
+          g.position.z = clamp(g.position.z + ddz / d * st, b.z1 + 0.6, b.z2 - 0.6);
+        }
+        g.scale.setScalar(1 + Math.sin(W.sim * 5 + it.ph) * 0.05);
+      }
+    } else if (it.gem) {
+      it.gem.rotation.y += sdt * (it.cleared ? 0.4 : 1.6);
+      it.gem.position.y = 1.5 + Math.sin(W.sim * 1.6 + it.ph) * 0.07;
+    }
+  }
+  for (const m of W.deco) { m.rotation.x += m.userData.v[0] * sdt; m.rotation.y += m.userData.v[1] * sdt; }
+  const pdt = dt * Math.max(0.35, W.ts);
+  W.parts = W.parts.filter(m => {
+    const u = m.userData; u.age += pdt;
+    if (u.age > u.life) { W.scene.remove(m); m.geometry.dispose(); m.material.dispose(); return false; }
+    u.v.y -= 9 * pdt; m.position.addScaledVector(u.v, pdt);
+    if (m.position.y < 0.05) { m.position.y = 0.05; u.v.y *= -0.3; u.v.x *= 0.7; u.v.z *= 0.7; }
+    m.rotation.x += u.s.x * pdt; m.rotation.y += u.s.y * pdt;
+    m.material.opacity = 1 - Math.max(0, (u.age - u.life * 0.6) / (u.life * 0.4));
+    return true;
+  });
+  const bob = moving && !rm() ? Math.sin(W.walk * 9) * 0.035 : 0;
+  W.cam.position.set(W.px, EYE + bob, W.pz);
+  W.cam.rotation.set(W.pitch, W.yaw, 0);
+  // which room am I in?
+  const room = W.rooms.slice().reverse().find(r => W.px >= r.rect.x1 && W.px <= r.rect.x2 && W.pz >= r.rect.z1 && W.pz <= r.rect.z2);
+  const nm = room ? room.name : 'Corridor';
+  if (nm !== W.room) { W.room = nm; $('#wRoom').innerHTML = `${esc(nm)}<small>${esc(room ? room.sub : '')}</small>`; }
+  // what am I looking at?
+  if (t - W.hoverT > 120) {
+    W.hoverT = t;
+    const p = wPick(0, 0), ok = p && p.d < 7;
+    $('#wXh').classList.toggle('on', !!ok);
+    let hint = '';
+    if (ok) {
+      const it = p.it;
+      if (it.kind === 'task') { const tk = taskById(it.id); hint = tk ? `${tk.level ? 'DISCHARGE' : 'TRIAGE'}: ${tk.title}` : ''; }
+      else if (it.kind === 'habit') { const h = habitById(it.id); hint = h ? `${it.cleared ? 'CLEARED' : 'TARGET'}: ${h.name}` : ''; }
+      else hint = it.cleared ? 'HIGHLIGHT: WIN SECURED' : 'HIGHLIGHT';
+    }
+    $('#wHint').textContent = hint;
+  }
+  W.r.render(W.scene, W.cam);
+  W.raf = requestAnimationFrame(wLoop);
+}
+// world input
+(() => {
+  const cv = $('#wcv');
+  cv.addEventListener('pointerdown', e => {
+    if (!W.on) return;
+    W.look = { id: e.pointerId, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, t: performance.now() };
+    try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    ac();
+  });
+  cv.addEventListener('pointermove', e => {
+    const L = W.look; if (!L || L.id !== e.pointerId) return;
+    const dx = e.clientX - L.x, dy = e.clientY - L.y; L.x = e.clientX; L.y = e.clientY;
+    W.yaw -= dx * 0.0055; W.pitch = clamp(W.pitch - dy * 0.0045, -1.2, 1.2);
+    if (dx || dy) W.lookMoved = true;
+  });
+  const up = e => {
+    const L = W.look; if (!L || L.id !== e.pointerId) return; W.look = null;
+    if (e.type === 'pointerup' && Math.hypot(e.clientX - L.sx, e.clientY - L.sy) < 8 && performance.now() - L.t < 450) wTap(e.clientX, e.clientY);
+  };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+  const joy = $('#wJoy'), knob = $('#wKnob');
+  const setJoy = e => {
+    const r = joy.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    let x = (e.clientX - cx) / 46, y = (e.clientY - cy) / 46; const l = Math.hypot(x, y); if (l > 1) { x /= l; y /= l; }
+    W.joy.x = x; W.joy.y = y; knob.style.transform = `translate(${x * 38}px, ${y * 38}px)`;
+  };
+  joy.addEventListener('pointerdown', e => { e.preventDefault(); W.joy.id = e.pointerId; try { joy.setPointerCapture(e.pointerId); } catch (_) {} setJoy(e); ac(); });
+  joy.addEventListener('pointermove', e => { if (W.joy.id === e.pointerId) setJoy(e); });
+  const jEnd = e => { if (W.joy.id !== e.pointerId) return; W.joy.id = null; W.joy.x = W.joy.y = 0; knob.style.transform = ''; };
+  joy.addEventListener('pointerup', jEnd); joy.addEventListener('pointercancel', jEnd);
+  document.addEventListener('keydown', e => {
+    const key = (e.key || '').toLowerCase();
+    if (!W.on) { if (key === 'escape' && !$('#world').hidden) worldClose(); return; }
+    if (key === 'escape') { if (W.panelItem) wPanelClose(); else worldClose(); return; }
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes((document.activeElement || {}).tagName)) return;
+    if (W.panelItem) return;
+    if (key === 'e' || key === ' ' || key === 'enter') { e.preventDefault(); const p = wPick(0, 0); if (p) wInteract(p.it, p.d); return; }
+    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) { e.preventDefault(); W.keys[key] = true; }
+  });
+  document.addEventListener('keyup', e => { W.keys[e.key.toLowerCase()] = false; });
+  window.addEventListener('blur', () => { W.keys = {}; });
+  window.addEventListener('resize', wResize);
+})();
 
 function init() {
   S = load();
