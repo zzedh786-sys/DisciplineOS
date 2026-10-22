@@ -8,11 +8,17 @@ It is a separate app from Triage OS in the repo root. It uses its own code, desi
 
 One self-contained file. Open `discipline-os/index.html` in any browser, or host the folder anywhere static (GitHub Pages works: `/discipline-os/`). Everything is stored in your browser only, so use **Settings → Back up and restore** now and then.
 
+## Design
+
+You race your own ghost. The top of Today is a two-lane track: you today (solid green) against yesterday's score (a dashed ghost), with your 30-day average marked across it. The headline is set in Anybody, a variable-width typeface, and it gets wider as you pull ahead of yesterday and narrower as you fall behind. Today runs down a timeline (wake, daytime, evening, bed) with a marker showing where you are, and a **Tempted?** button floats on the screen for the moment an urge hits.
+
+Body text is Atkinson Hyperlegible, chosen to be easy to read when you're tired. Colours: green means you, progress and anything done; violet means actions, focus and evenings; lilac means yesterday and averages; crimson is kept for slips and Urgent tasks.
+
 ## What's inside
 
 | Section | What it does |
 | --- | --- |
-| **Today** | Today's identity statement, your score out of 100 against yesterday and your 30-day average, the **Highlight**, morning and evening routines, today's plan with time blocks, the dopamine guard, and the evening reflection prompt. The order follows the time of day. |
+| **Today** | The ghost race (your score out of 100 against yesterday and your 30-day average), today's identity vote, the **Highlight**, a quote, then a timeline of the day: morning routine and check-in, today's plan with time blocks, evening routine, and the evening reflection. Bad-habit logging sits at the bottom, with **Tempted?** always on screen. |
 | **Habits** | Morning, Evening and Anytime habits, plus **Break** for bad habits. Every habit has a habit-stack cue, a time and place, a **full** and a **2-minute** version, chosen days, an Energize tag (sleep, move, fuel, daylight), the four laws, and the identity it votes for. |
 | **Tasks** | The master list as three columns: **Urgent**, **Semi-urgent**, **Routine**. Drag a card by its handle to move it (touch and mouse, with edge autoscroll), or tap the urgency tag to cycle it. Add any task to today's plan or make it the Highlight. |
 | **Goals** | Daily, weekly, monthly, quarterly and yearly goals. Each one can have a numeric target, support a bigger goal (year → quarter → month → week → day), and vote for an identity. Unfinished goals can be carried over into the next period. |
