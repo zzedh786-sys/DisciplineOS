@@ -10,15 +10,16 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: a single working column (max 760px) under a sticky status bar; bottom tab bar on phones, left rail from 960px. Motif: the dashed "your average" line every score has to clear. Dawn amber marks the morning, dusk indigo the evening. */
+/* Layout: a single working column (max 760px) under a sticky status bar; bottom tab bar on phones, left rail from 960px. Motif: the dashed "your average" line every score has to clear. Green marks the morning and every completion; violet marks the evening, focus and the main actions. The violet-to-green gradient is kept for quotes and the compounding panel. */
 :root{
-  --bg:#EEF1F4; --surface:#FFFFFF; --surface-2:#E4E9EE; --ink:#111922; --ink-2:#46525E; --ink-3:#6C7985; --line:#D3DAE0;
-  --dawn:#D88A0B; --dawn-ink:#8A5300; --dawn-soft:#FBEACB; --on-dawn:#1C1200;
-  --dusk:#4450C4; --dusk-ink:#3440B0; --dusk-soft:#E1E4F8;
-  --good:#1E8758; --good-soft:#D8F0E4; --bad:#C2412E; --bad-soft:#F7DED8;
-  --u-routine:#7A8792; --u-semi:#D88A0B; --u-urgent:#C2412E;
-  --shadow:0 1px 2px rgba(17,25,34,.06),0 10px 30px -18px rgba(17,25,34,.28);
-  --scrim:rgba(10,14,18,.48);
+  --bg:#F1EFF6; --surface:#FFFFFF; --surface-2:#E8E5F0; --ink:#17131F; --ink-2:#4A4558; --ink-3:#716B80; --line:#DAD6E4;
+  --violet:#6D3FD8; --violet-ink:#5A2EC2; --violet-soft:#ECE5FC; --on-violet:#FFFFFF;
+  --leaf:#14834F; --leaf-ink:#0F6E41; --leaf-soft:#DCF2E6; --on-leaf:#FFFFFF;
+  --good:#14834F; --good-soft:#DCF2E6; --bad:#C3344B; --bad-soft:#F8DEE3;
+  --u-routine:#7D7690; --u-semi:#7A4BE0; --u-urgent:#C3344B;
+  --grad:linear-gradient(135deg,#4A22AE 0%,#2B3F8F 52%,#0E7448 100%); --on-grad:#FFFFFF; --mint:#B9F3D6;
+  --shadow:0 1px 2px rgba(23,19,31,.06),0 10px 30px -18px rgba(40,20,80,.3);
+  --scrim:rgba(14,10,22,.5);
   --font-d:'Bricolage Grotesque','Avenir Next','Segoe UI',system-ui,sans-serif;
   --font-b:'Instrument Sans','Helvetica Neue','Segoe UI',system-ui,sans-serif;
   --font-m:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
@@ -27,22 +28,24 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#0B1015; --surface:#131A21; --surface-2:#1C252E; --ink:#E5EBF0; --ink-2:#A6B2BD; --ink-3:#7A8793; --line:#25313B;
-    --dawn:#F2B13F; --dawn-ink:#F2B13F; --dawn-soft:#33260F; --on-dawn:#1C1200;
-    --dusk:#939CF6; --dusk-ink:#A9B0FA; --dusk-soft:#20244A;
-    --good:#4CC48A; --good-soft:#11301F; --bad:#F27D69; --bad-soft:#3A1B16;
-    --u-routine:#8593A0; --u-semi:#F2B13F; --u-urgent:#F27D69;
+    --bg:#0D0B13; --surface:#15121D; --surface-2:#201B2B; --ink:#EDEAF4; --ink-2:#B2ABC2; --ink-3:#827B94; --line:#2B2539;
+    --violet:#A98BFF; --violet-ink:#BCA5FF; --violet-soft:#2A2047; --on-violet:#160C2E;
+    --leaf:#4ED69A; --leaf-ink:#6BE3AE; --leaf-soft:#0F2F22; --on-leaf:#05200F;
+    --good:#4ED69A; --good-soft:#0F2F22; --bad:#F27A8E; --bad-soft:#3B1820;
+    --u-routine:#8B849C; --u-semi:#A98BFF; --u-urgent:#F27A8E;
+    --grad:linear-gradient(135deg,#3B1E8C 0%,#223574 52%,#0B5E3B 100%); --on-grad:#FFFFFF; --mint:#B9F3D6;
     --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.7);
     --scrim:rgba(0,0,0,.62);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#0B1015; --surface:#131A21; --surface-2:#1C252E; --ink:#E5EBF0; --ink-2:#A6B2BD; --ink-3:#7A8793; --line:#25313B;
-  --dawn:#F2B13F; --dawn-ink:#F2B13F; --dawn-soft:#33260F; --on-dawn:#1C1200;
-  --dusk:#939CF6; --dusk-ink:#A9B0FA; --dusk-soft:#20244A;
-  --good:#4CC48A; --good-soft:#11301F; --bad:#F27D69; --bad-soft:#3A1B16;
-  --u-routine:#8593A0; --u-semi:#F2B13F; --u-urgent:#F27D69;
+  --bg:#0D0B13; --surface:#15121D; --surface-2:#201B2B; --ink:#EDEAF4; --ink-2:#B2ABC2; --ink-3:#827B94; --line:#2B2539;
+  --violet:#A98BFF; --violet-ink:#BCA5FF; --violet-soft:#2A2047; --on-violet:#160C2E;
+  --leaf:#4ED69A; --leaf-ink:#6BE3AE; --leaf-soft:#0F2F22; --on-leaf:#05200F;
+  --good:#4ED69A; --good-soft:#0F2F22; --bad:#F27A8E; --bad-soft:#3B1820;
+  --u-routine:#8B849C; --u-semi:#A98BFF; --u-urgent:#F27A8E;
+  --grad:linear-gradient(135deg,#3B1E8C 0%,#223574 52%,#0B5E3B 100%); --on-grad:#FFFFFF; --mint:#B9F3D6;
   --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -16px rgba(0,0,0,.7);
   --scrim:rgba(0,0,0,.62);
   color-scheme:dark;
@@ -56,7 +59,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--font-b);
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--bg)}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0}
-:focus-visible{outline:2px solid var(--dawn);outline-offset:2px}
+:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
 h1,h2,h3{font-family:var(--font-d);margin:0;text-wrap:balance;letter-spacing:-.01em;line-height:1.1}
 p{margin:0}
 .mono{font-family:var(--font-m);font-variant-numeric:tabular-nums}
@@ -81,12 +84,12 @@ p{margin:0}
 .lvchip .meta{display:grid;gap:3px;min-width:0}
 .lvchip .rk{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
 .lvchip .bar{width:84px;height:4px;border-radius:4px;background:var(--surface-2);overflow:hidden}
-.lvchip .bar i{display:block;height:100%;background:var(--dawn);transition:width .4s}
+.lvchip .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--leaf));transition:width .4s}
 .lvchip .xp{font:500 11px/1 var(--font-m);color:var(--ink-3);white-space:nowrap}
 .lvchip.bump{animation:bump .5s}
 @keyframes bump{30%{transform:scale(1.06)}}
 .streak{display:flex;align-items:center;gap:5px;font:700 13px/1 var(--font-m);padding:6px 10px;border-radius:999px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);white-space:nowrap}
-.streak svg{width:14px;height:14px;color:var(--dawn)}
+.streak svg{width:14px;height:14px;color:var(--violet)}
 .iconbtn{width:36px;height:36px;display:grid;place-items:center;border-radius:999px;color:var(--ink-2);flex:none}
 .iconbtn:hover{background:var(--surface-2)}
 .iconbtn svg{width:20px;height:20px}
@@ -100,7 +103,7 @@ main{max-width:760px;margin:0 auto;padding-block:18px 110px;padding-left:max(16p
 .tab{display:grid;justify-items:center;gap:3px;padding:9px 2px 8px;font-size:11px;font-weight:600;color:var(--ink-3)}
 .tab svg{width:22px;height:22px}
 .tab.on{color:var(--ink)}
-.tab.on svg{color:var(--dawn)}
+.tab.on svg{color:var(--violet)}
 @media (min-width:960px){
   .shell{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
   .rail{display:grid;align-content:start;gap:2px;position:sticky;top:calc(64px + env(safe-area-inset-top,0px));padding-top:18px;height:max-content}
@@ -120,15 +123,15 @@ main{max-width:760px;margin:0 auto;padding-block:18px 110px;padding-left:max(16p
 .ch .eyebrow{margin-bottom:4px}
 .ch .side{font:500 12px/1.3 var(--font-m);color:var(--ink-3);text-align:right;white-space:nowrap}
 .sun,.moon{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:8px;flex:none}
-.sun{background:var(--dawn-soft);color:var(--dawn-ink)}
-.moon{background:var(--dusk-soft);color:var(--dusk-ink)}
+.sun{background:var(--leaf-soft);color:var(--leaf-ink)}
+.moon{background:var(--violet-soft);color:var(--violet-ink)}
 .sun svg,.moon svg{width:16px;height:16px}
 .titlerow{display:flex;align-items:center;gap:10px}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:8px 14px;border-radius:10px;background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;white-space:nowrap;transition:transform .08s}
 .btn:active{transform:scale(.97)}
-.btn.dawn{background:var(--dawn);color:var(--on-dawn)}
-.btn.dusk{background:var(--dusk);color:#fff}
+.btn.accent{background:var(--violet);color:var(--on-violet)}
+.btn.leaf{background:var(--leaf);color:var(--on-leaf)}
 .btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1px var(--line)}
 .btn.ghost:hover{background:var(--surface-2)}
 .btn.soft{background:var(--surface-2);color:var(--ink)}
@@ -144,7 +147,7 @@ main{max-width:760px;margin:0 auto;padding-block:18px 110px;padding-left:max(16p
 .chip input{position:absolute;opacity:0;pointer-events:none}
 .chip small{color:inherit;opacity:.7;font-size:11px}
 label.chip{cursor:pointer;position:relative}
-label.chip:has(input:focus-visible){outline:2px solid var(--dawn);outline-offset:2px}
+label.chip:has(input:focus-visible){outline:2px solid var(--violet);outline-offset:2px}
 
 .seg{display:flex;background:var(--surface-2);border-radius:11px;padding:3px;gap:2px;overflow-x:auto;scrollbar-width:none}
 .seg::-webkit-scrollbar{display:none}
@@ -155,21 +158,21 @@ label.chip:has(input:focus-visible){outline:2px solid var(--dawn);outline-offset
 .field>span{font-size:12px;font-weight:600;color:var(--ink-2)}
 input[type=text],input[type=number],input[type=time],input[type=date],input:not([type]),select,textarea{width:100%;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:15px;line-height:1.35}
 textarea{resize:vertical}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--dawn);box-shadow:0 0 0 3px var(--dawn-soft)}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-soft)}
 input[type=number]{font-family:var(--font-m)}
 .inline{display:flex;gap:8px;min-width:0}
 .inline>input{flex:1}
 
 .bar{height:6px;border-radius:6px;background:var(--surface-2);overflow:hidden}
-.bar i{display:block;height:100%;border-radius:6px;background:var(--dawn);transition:width .35s}
+.bar i{display:block;height:100%;border-radius:6px;background:var(--violet);transition:width .35s}
 .bar.good i{background:var(--good)}
-.bar.dusk i{background:var(--dusk)}
+.bar.leaf i{background:var(--leaf)}
 .empty{padding:14px;border-radius:10px;background:var(--bg);color:var(--ink-3);font-size:13px;text-align:center}
 .pill{display:inline-flex;align-items:center;gap:4px;font:600 11px/1 var(--font-m);letter-spacing:.04em;padding:4px 7px;border-radius:6px;background:var(--surface-2);color:var(--ink-2);white-space:nowrap}
 .pill.good{background:var(--good-soft);color:var(--good)}
 .pill.bad{background:var(--bad-soft);color:var(--bad)}
-.pill.dawn{background:var(--dawn-soft);color:var(--dawn-ink)}
-.pill.dusk{background:var(--dusk-soft);color:var(--dusk-ink)}
+.pill.accent{background:var(--violet-soft);color:var(--violet-ink)}
+.pill.leaf{background:var(--leaf-soft);color:var(--leaf-ink)}
 .ex{font:500 10px/1 var(--font-m);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);border:1px dashed var(--line);border-radius:5px;padding:2px 5px;vertical-align:1px}
 hr.sep{border:0;border-top:1px solid var(--line);margin:0}
 details>summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink-2);list-style:none}
@@ -182,7 +185,7 @@ details[open]>summary::before{content:"− "}
 @media (max-width:640px){.hero{grid-template-columns:1fr}}
 .hero-id{display:grid;align-content:space-between;gap:14px;padding:4px 2px}
 .hero-id h1{font-size:clamp(28px,6vw,40px);font-weight:800;line-height:1.02}
-.hero-id .qm{color:var(--dawn-ink)}
+.hero-id .qm{color:var(--violet-ink)}
 .hero-id p{color:var(--ink-2);font-size:14px;max-width:44ch}
 .score{display:grid;gap:8px}
 .score .nums{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
@@ -190,21 +193,34 @@ details[open]>summary::before{content:"− "}
 .score .big small{font:500 13px/1 var(--font-m);color:var(--ink-3);letter-spacing:0;margin-left:3px}
 .delta{font:600 12px/1.25 var(--font-m);padding:6px 8px;border-radius:8px;text-align:right}
 .delta.up{background:var(--good-soft);color:var(--good)}
-.delta.down{background:var(--dawn-soft);color:var(--dawn-ink)}
+.delta.down{background:var(--violet-soft);color:var(--violet-ink)}
 .delta.flat{background:var(--surface-2);color:var(--ink-2)}
 svg.spark{width:100%;height:auto;display:block;overflow:visible}
 .spark .ln{fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
-.spark .ar{fill:var(--dawn-soft);stroke:none}
+.spark .ar{fill:var(--violet-soft);stroke:none}
 .spark .avgl,.chart .avgl{stroke:var(--ink-3);stroke-width:1;stroke-dasharray:3 3}
 .spark .avgt,.chart .avgt{fill:var(--ink-3);font:500 9.5px var(--font-m)}
-.spark .endp{fill:var(--dawn);stroke:var(--surface);stroke-width:2}
+.spark .endp{fill:var(--violet);stroke:var(--surface);stroke-width:2}
 .spark .dot{fill:var(--ink)}
+
+/* ---------- quotes ---------- */
+.quote{position:relative;overflow:hidden;display:grid;gap:12px;padding:18px;border-radius:var(--r);background:var(--grad);color:var(--on-grad);box-shadow:var(--shadow)}
+.quote::before{content:"”";position:absolute;right:14px;bottom:-96px;font:800 170px/1 var(--font-d);color:var(--on-grad);opacity:.12;pointer-events:none}
+.quote blockquote{margin:0;font:700 clamp(19px,4.4vw,25px)/1.22 var(--font-d);letter-spacing:-.01em;text-wrap:balance;position:relative;max-width:34ch}
+.quote .who{font:500 12.5px/1.35 var(--font-m);color:var(--mint)}
+.quote .qtag{font:600 10.5px/1 var(--font-m);letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.16)}
+.quote .qn{font:600 12px/1 var(--font-m);padding:7px 10px;border-radius:8px;color:var(--on-grad);box-shadow:inset 0 0 0 1px rgba(255,255,255,.4);position:relative}
+.quote .qn:hover{background:rgba(255,255,255,.12)}
+.qline{margin:0;max-width:440px;display:grid;gap:6px;text-align:center}
+.qline blockquote{margin:0;font:600 15px/1.4 var(--font-d);color:var(--ink);text-wrap:balance}
+.qline figcaption{font:500 11.5px/1.3 var(--font-m);color:var(--violet-ink)}
+#sheet .qline{margin:4px auto 0}
 
 /* ---------- highlight ---------- */
 .hl{position:relative;overflow:hidden}
-.hl .star{color:var(--dawn)}
+.hl .star{color:var(--violet)}
 .hl-text{font:700 clamp(22px,4.8vw,30px)/1.12 var(--font-d);letter-spacing:-.015em;text-wrap:balance;overflow-wrap:anywhere}
-.hl.done .hl-text{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--dawn)}
+.hl.done .hl-text{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--violet)}
 .hl-done{display:flex;align-items:center;gap:8px;color:var(--good);font-weight:600;font-size:14px}
 
 /* ---------- habit rows ---------- */
@@ -215,12 +231,12 @@ svg.spark{width:100%;height:auto;display:block;overflow:visible}
 .ring svg{width:16px;height:16px}
 .hrow.full .ring{background:var(--good);box-shadow:none;color:#fff}
 .hrow.min .ring{background:var(--good-soft);box-shadow:inset 0 0 0 2px var(--good);color:var(--good)}
-.hrow.risk .ring{box-shadow:inset 0 0 0 2px var(--dawn)}
+.hrow.risk .ring{box-shadow:inset 0 0 0 2px var(--violet)}
 .hn{font-weight:600;line-height:1.3}
 .hcue{font-size:13px;color:var(--ink-2);line-height:1.35}
 .hcue b{font-weight:600;color:var(--ink)}
 .hmeta{display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:3px;font:500 11.5px/1.3 var(--font-m);color:var(--ink-3)}
-.hmeta .warn{color:var(--dawn-ink)}
+.hmeta .warn{color:var(--violet-ink)}
 .hmeta .bro{color:var(--bad)}
 .hmeta .st{color:var(--ink)}
 .hacts{display:flex;gap:6px;align-items:center}
@@ -249,7 +265,7 @@ svg.spark{width:100%;height:auto;display:block;overflow:visible}
 .dots i.min{background:var(--good);opacity:.45}
 .dots i.miss{background:var(--bad-soft);box-shadow:inset 0 0 0 1px var(--bad)}
 .dots i.off{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
-.dots i.pend{background:transparent;box-shadow:inset 0 0 0 1.5px var(--dawn)}
+.dots i.pend{background:transparent;box-shadow:inset 0 0 0 1.5px var(--violet)}
 .dots i.pre{background:transparent}
 .laws{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px;font-size:13px;margin:8px 0 0}
 .laws dt{font:600 11px/1.6 var(--font-m);color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em}
@@ -264,7 +280,7 @@ svg.spark{width:100%;height:auto;display:block;overflow:visible}
 .badrow+.badrow{border-top:1px solid var(--line)}
 .badrow .bn{font-weight:600}
 .urgebtn{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:12px;background:var(--ink);color:var(--bg);text-align:left}
-.urgebtn svg{width:26px;height:26px;flex:none;color:var(--dawn)}
+.urgebtn svg{width:26px;height:26px;flex:none;color:var(--violet)}
 .urgebtn b{display:block;font:700 17px/1.2 var(--font-d)}
 .urgebtn span{font-size:13px;opacity:.75}
 .strip{display:grid;grid-template-columns:repeat(28,1fr);gap:2px}
@@ -290,11 +306,11 @@ svg.spark{width:100%;height:auto;display:block;overflow:visible}
 .blk:first-child{border-top:0}
 .blk .tm{font:600 12.5px/1.3 var(--font-m);font-variant-numeric:tabular-nums}
 .blk .tm small{display:block;color:var(--ink-3);font-weight:500}
-.blk.now{background:linear-gradient(90deg,var(--dawn-soft),transparent);border-radius:8px;padding-inline:6px;margin-inline:-6px}
+.blk.now{background:linear-gradient(90deg,var(--violet-soft),transparent);border-radius:8px;padding-inline:6px;margin-inline:-6px}
 .blk.past .bl{color:var(--ink-3)}
 .blk.done .bl{text-decoration:line-through;color:var(--ink-3)}
-.nowline{display:flex;align-items:center;gap:8px;font:600 11px/1 var(--font-m);color:var(--dawn-ink);padding:4px 0}
-.nowline::after{content:"";flex:1;border-top:1.5px solid var(--dawn)}
+.nowline{display:flex;align-items:center;gap:8px;font:600 11px/1 var(--font-m);color:var(--violet-ink);padding:4px 0}
+.nowline::after{content:"";flex:1;border-top:1.5px solid var(--violet)}
 
 .tcard{display:grid;grid-template-columns:22px 26px minmax(0,1fr);grid-template-areas:"g k b" "g k a";gap:4px 8px;align-items:center;padding:10px 10px 10px 6px;border-radius:11px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line),inset 3px 0 0 var(--uc,var(--u-routine));position:relative;touch-action:pan-y}
 .tcard.u-routine{--uc:var(--u-routine)} .tcard.u-semi{--uc:var(--u-semi)} .tcard.u-urgent{--uc:var(--u-urgent)}
@@ -311,7 +327,7 @@ svg.spark{width:100%;height:auto;display:block;overflow:visible}
 .tcard .ta{grid-area:a;display:flex;flex-wrap:wrap;gap:6px}
 .upill{font:600 11px/1 var(--font-m);padding:5px 8px;border-radius:6px;background:color-mix(in srgb,var(--uc) 16%,transparent);color:var(--ink);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--uc) 55%,transparent);letter-spacing:.02em}
 .todaybtn{font:600 11px/1 var(--font-m);padding:5px 8px;border-radius:6px;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink-2)}
-.todaybtn.on{background:var(--dawn-soft);color:var(--dawn-ink);box-shadow:inset 0 0 0 1px var(--dawn)}
+.todaybtn.on{background:var(--violet-soft);color:var(--violet-ink);box-shadow:inset 0 0 0 1px var(--violet)}
 .tcard.lifted{opacity:.35;outline:2px dashed var(--ink-3);outline-offset:-2px}
 .tcard.ghost{position:fixed;z-index:80;pointer-events:none;box-shadow:0 18px 40px -12px rgba(0,0,0,.45),inset 0 0 0 1px var(--line),inset 3px 0 0 var(--uc);transform:rotate(1.2deg);margin:0}
 body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
@@ -362,7 +378,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .tile .tr{font:600 11px/1.2 var(--font-m)}
 svg.chart{width:100%;height:auto;display:block}
 .chart .bx{fill:var(--surface-2)}
-.chart .ab{fill:var(--dawn)}
+.chart .ab{fill:var(--violet)}
 .chart .bl{fill:var(--ink-3)}
 .chart .bt{fill:var(--ink);font:600 10px var(--font-m)}
 .chart .dl{fill:var(--ink-3);font:500 10px var(--font-m)}
@@ -379,7 +395,7 @@ table.hg td{padding:0}
 .c.min{background:color-mix(in srgb,var(--good) 45%,var(--surface-2))}
 .c.miss{background:var(--bad-soft)}
 .c.off{background:transparent;box-shadow:inset 0 0 0 1px var(--line)}
-.c.pend{background:transparent;box-shadow:inset 0 0 0 1.5px var(--dawn)}
+.c.pend{background:transparent;box-shadow:inset 0 0 0 1.5px var(--violet)}
 .c.fut,.c.pre{background:transparent}
 .c.s1{background:color-mix(in srgb,var(--bad) 30%,var(--surface-2));color:var(--ink)}
 .c.s2{background:color-mix(in srgb,var(--bad) 60%,var(--surface-2));color:var(--ink)}
@@ -400,10 +416,10 @@ table.hg td{padding:0}
 .hbar{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:3px 10px;align-items:center;font-size:13px}
 .hbar .bar{grid-column:1/-1}
 .hbar b{font:700 12px/1 var(--font-m);text-align:right}
-.compound{display:grid;gap:4px;padding:14px;border-radius:12px;background:var(--ink);color:var(--bg)}
+.compound{display:grid;gap:4px;padding:14px;border-radius:12px;background:var(--grad);color:var(--on-grad)}
 .compound .eyebrow{color:inherit;opacity:.65}
 .compound b{font:800 30px/1 var(--font-d);letter-spacing:-.02em}
-.compound .mono{color:var(--dawn)}
+.compound .mono{color:var(--mint)}
 .compound p{font-size:13px;opacity:.8}
 
 /* ---------- reflect ---------- */
@@ -419,13 +435,13 @@ table.hg td{padding:0}
 .lzring{position:relative;width:min(300px,72vw);aspect-ratio:1;max-width:100%}
 .lzring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .lzring .tr{fill:none;stroke:var(--surface-2);stroke-width:6}
-.lzring .pr{fill:none;stroke:var(--dawn);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+.lzring .pr{fill:none;stroke:var(--violet);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
 .lzring .clock{position:absolute;inset:0;display:grid;place-items:center;font:700 clamp(46px,14vw,72px)/1 var(--font-m);font-variant-numeric:tabular-nums;letter-spacing:-.03em}
 .lzmsg{font-size:14px;color:var(--ink-2);max-width:40ch;min-height:21px}
 .breath{position:relative;width:min(220px,60vw);aspect-ratio:1;display:grid;place-items:center;max-width:100%}
-.breath i{position:absolute;inset:0;border-radius:50%;background:var(--dusk-soft);box-shadow:inset 0 0 0 2px var(--dusk);animation:breathe 8s ease-in-out infinite}
+.breath i{position:absolute;inset:0;border-radius:50%;background:var(--leaf-soft);box-shadow:inset 0 0 0 2px var(--leaf);animation:breathe 8s ease-in-out infinite}
 .breath b{position:relative;font:700 40px/1 var(--font-m);font-variant-numeric:tabular-nums}
-.breath small{position:absolute;bottom:22%;font:600 11px/1 var(--font-m);letter-spacing:.1em;color:var(--dusk-ink);text-transform:uppercase}
+.breath small{position:absolute;bottom:22%;font:600 11px/1 var(--font-m);letter-spacing:.1em;color:var(--leaf-ink);text-transform:uppercase}
 @keyframes breathe{0%,100%{transform:scale(.62)}50%{transform:scale(1)}}
 .swap{max-width:420px;padding:12px 14px;border-radius:12px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);font-size:14px;text-align:left}
 .ov .row{justify-content:center}
@@ -442,13 +458,13 @@ table.hg td{padding:0}
 #onb{position:fixed;inset:0;z-index:96;background:var(--bg);overflow:auto;padding-block:calc(28px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .onb-in{max-width:560px;margin:0 auto;display:grid;gap:18px}
 .onb-in h1{font-size:clamp(34px,9vw,54px);font-weight:800;line-height:.98}
-.onb-in h1 em{font-style:normal;color:var(--dawn-ink)}
+.onb-in h1 em{font-style:normal;color:var(--violet-ink)}
 .steps{display:flex;gap:6px}
 .steps i{flex:1;height:4px;border-radius:4px;background:var(--surface-2)}
-.steps i.on{background:var(--dawn)}
+.steps i.on{background:var(--violet)}
 .pick{display:grid;gap:6px}
 .pick label{display:grid;grid-template-columns:22px minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border-radius:10px;background:var(--surface);box-shadow:inset 0 0 0 1px var(--line);cursor:pointer;text-align:left}
-.pick input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--dawn)}
+.pick input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--violet)}
 .pick b{font-weight:600}
 .pick small{display:block;color:var(--ink-3);font-size:12.5px}
 
@@ -456,7 +472,7 @@ table.hg td{padding:0}
 @media (min-width:960px){#toast{bottom:28px}}
 #toast.in{animation:tin .18s ease-out}
 @keyframes tin{from{transform:translate(-50%,8px);opacity:0}}
-.floater{position:fixed;z-index:99;pointer-events:none;font:700 14px/1 var(--font-m);color:var(--dawn-ink);transform:translate(-50%,0);animation:fl .9s ease-out forwards;text-shadow:0 1px 0 var(--surface)}
+.floater{position:fixed;z-index:99;pointer-events:none;font:700 14px/1 var(--font-m);color:var(--violet-ink);transform:translate(-50%,0);animation:fl .9s ease-out forwards;text-shadow:0 1px 0 var(--surface)}
 @keyframes fl{to{transform:translate(-50%,-38px);opacity:0}}
 
 @media (prefers-reduced-motion: reduce){
@@ -468,7 +484,7 @@ table.hg td{padding:0}
 <body>
 <header class="top"><div class="in">
   <a class="brand" href="#today" data-act="nav" data-v="today" aria-label="Discipline OS, today" style="color:inherit;text-decoration:none">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="var(--ink)"/><path d="M6 15.5h12" stroke="var(--bg)" stroke-width="1.4" stroke-dasharray="2 2"/><path d="M6 17l4-5 3 2.5L18 7" fill="none" stroke="var(--dawn)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="var(--ink)"/><path d="M6 15.5h12" stroke="var(--bg)" stroke-width="1.4" stroke-dasharray="2 2"/><path d="M6 17l4-5 3 2.5L18 7" fill="none" stroke="var(--leaf)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span>Discipline OS<small>Better than yesterday</small></span>
   </a>
   <div class="hud">
@@ -613,6 +629,59 @@ const BAD_LIB = [
   { id: 'b-caffeine', name: 'Caffeine after 2pm', unit: 'times', invisible: 'No coffee pods at work after lunch', unattractive: 'It steals deep sleep tonight', difficult: 'Swap to decaf or water after 2pm', unsatisfying: 'Logged against tomorrow’s energy' },
 ];
 
+/* Quote bank. Attributions are to the speaker; anime lines are from the English translations. */
+const QCATS = { motivation: 'Motivation', discipline: 'Discipline', naruto: 'Naruto', dbz: 'Dragon Ball Z', onepiece: 'One Piece', demonslayer: 'Demon Slayer', ronaldo: 'Cristiano Ronaldo', mine: 'Your quotes' };
+const Q = (cat, t, a) => ({ cat, t, a });
+const QUOTES = [
+  Q('motivation', 'It always seems impossible until it’s done.', 'Nelson Mandela'),
+  Q('motivation', 'Don’t count the days. Make the days count.', 'Muhammad Ali'),
+  Q('motivation', 'I hated every minute of training, but I said, “Don’t quit. Suffer now and live the rest of your life as a champion.”', 'Muhammad Ali'),
+  Q('motivation', 'Everything negative – pressure, challenges – is all an opportunity for me to rise.', 'Kobe Bryant'),
+  Q('motivation', 'There is nothing noble in being superior to your fellow man; true nobility is being superior to your former self.', 'W. L. Sheldon, often credited to Hemingway'),
+  Q('motivation', 'You are in danger of living a life so comfortable and soft that you will die without ever realizing your true potential.', 'David Goggins'),
+  Q('motivation', 'Hard work beats talent when talent doesn’t work hard.', 'Tim Notke'),
+  Q('motivation', 'The man who moves a mountain begins by carrying away small stones.', 'Attributed to Confucius'),
+  Q('discipline', 'We are what we repeatedly do. Excellence, then, is not an act, but a habit.', 'Will Durant'),
+  Q('discipline', 'You do not rise to the level of your goals. You fall to the level of your systems.', 'James Clear, Atomic Habits'),
+  Q('discipline', 'Every action you take is a vote for the type of person you wish to become.', 'James Clear, Atomic Habits'),
+  Q('discipline', 'Discipline equals freedom.', 'Jocko Willink'),
+  Q('discipline', 'We must all suffer one of two things: the pain of discipline or the pain of regret.', 'Jim Rohn'),
+  Q('discipline', 'Discipline is the bridge between goals and accomplishment.', 'Jim Rohn'),
+  Q('discipline', 'The successful warrior is the average man, with laser-like focus.', 'Bruce Lee'),
+  Q('discipline', 'I fear not the man who has practiced 10,000 kicks once, but I fear the man who has practiced one kick 10,000 times.', 'Bruce Lee'),
+  Q('discipline', 'First forget inspiration. Habit is more dependable.', 'Octavia E. Butler'),
+  Q('discipline', 'Motivation is what gets you started. Habit is what keeps you going.', 'Jim Ryun'),
+  Q('discipline', 'Waste no more time arguing about what a good man should be. Be one.', 'Marcus Aurelius, Meditations'),
+  Q('naruto', 'I’m not gonna run away, I never go back on my word! That’s my nindo: my ninja way!', 'Naruto Uzumaki'),
+  Q('naruto', 'Hard work is worthless for those that don’t believe in themselves.', 'Naruto Uzumaki'),
+  Q('naruto', 'A dropout will beat a genius through hard work.', 'Rock Lee'),
+  Q('naruto', 'If you don’t like your destiny, don’t accept it. Instead, have the courage to change it the way you want it to be.', 'Naruto Uzumaki'),
+  Q('naruto', 'When you give up, your dreams and everything else, they’re gone.', 'Naruto Uzumaki'),
+  Q('naruto', 'People become stronger because they have memories they can’t forget.', 'Tsunade'),
+  Q('naruto', 'Those who break the rules are scum, but those who abandon their friends are worse than scum.', 'Kakashi Hatake'),
+  Q('dbz', 'Power comes in response to a need, not a desire. You have to create that need.', 'Goku'),
+  Q('dbz', 'I am the hope of the universe. I am the answer to all living things that cry out for peace.', 'Goku'),
+  Q('dbz', 'There’s no such thing as fair or unfair in battle. There is only victory or, in your case, defeat.', 'Vegeta'),
+  Q('dbz', 'I would rather be a brainless monkey than a heartless monster.', 'Goku'),
+  Q('onepiece', 'I don’t want to conquer anything. I just think the guy with the most freedom in this whole ocean is the Pirate King!', 'Monkey D. Luffy'),
+  Q('onepiece', 'If you don’t take risks, you can’t create a future!', 'Monkey D. Luffy'),
+  Q('onepiece', 'When the world shoves you around, you just gotta stand up and shove back. It’s not like somebody’s gonna save you if you start babbling excuses.', 'Roronoa Zoro'),
+  Q('onepiece', 'Scars on the back are a swordsman’s shame.', 'Roronoa Zoro'),
+  Q('onepiece', 'Inherited will, the destiny of the age, and the dreams of the people. As long as people continue to pursue the meaning of freedom, these things will never cease to be!', 'Gol D. Roger'),
+  Q('onepiece', 'I’m gonna be King of the Pirates!', 'Monkey D. Luffy'),
+  Q('demonslayer', 'Set your heart ablaze. Go beyond your limits.', 'Kyojuro Rengoku'),
+  Q('demonslayer', 'No matter how many people you may lose, you have no choice but to go on living. No matter how devastating the blows may be.', 'Tanjiro Kamado'),
+  Q('demonslayer', 'Don’t ever give others the power to decide your fate!', 'Giyu Tomioka'),
+  Q('demonslayer', 'Feel the rage. The powerful, pure rage of not being able to forgive will become your unswerving drive to take action.', 'Giyu Tomioka'),
+  Q('demonslayer', 'I’m the eldest son, so I could endure it. If I were the second son, I wouldn’t have been able to.', 'Tanjiro Kamado'),
+  Q('ronaldo', 'Talent without working hard is nothing.', 'Cristiano Ronaldo'),
+  Q('ronaldo', 'Your love makes me strong. Your hate makes me unstoppable.', 'Cristiano Ronaldo'),
+  Q('ronaldo', 'If you think you’re perfect already, then you never will be.', 'Cristiano Ronaldo'),
+  Q('ronaldo', 'I’m living a dream I never want to wake up from.', 'Cristiano Ronaldo'),
+  Q('ronaldo', 'We don’t want to tell our dreams. We want to show them.', 'Cristiano Ronaldo'),
+];
+const qSource = q => ({ naruto: 'Naruto', dbz: 'Dragon Ball Z', onepiece: 'One Piece', demonslayer: 'Demon Slayer' }[q.cat] || '');
+
 function defaults() {
   const tk = rawToday(3), now = Date.now();
   const T = (title, urgency, o = {}) => Object.assign({ id: uid(), title, urgency, due: null, notes: '', goalId: null, created: now, done: null, doneKey: null, order: 0, ex: true }, o);
@@ -645,8 +714,8 @@ function defaults() {
     habits: HABIT_LIB.map(h => Object.assign({}, h, { laws: Object.assign({}, h.laws), days: ALL_DAYS.slice(), since: tk })),
     bad: BAD_LIB.slice(0, 3).map(b => Object.assign({}, b, { since: tk })),
     tasks, goals: [gY1, gY2, gQ, gM, gW, gD],
-    days: {}, focusRun: null,
-    settings: { theme: 'system', rollover: 3, wake: '06:30', bed: '22:30', sound: true },
+    days: {}, focusRun: null, quotes: [],
+    settings: { theme: 'system', rollover: 3, wake: '06:30', bed: '22:30', sound: true, quoteCats: Object.keys(QCATS) },
   };
 }
 
@@ -658,8 +727,9 @@ function migrate(d) {
   const def = defaults();
   for (const k in def) if (!(k in d)) d[k] = def[k];
   d.settings = Object.assign({}, def.settings, d.settings || {});
-  ['identities', 'habits', 'bad', 'tasks', 'goals'].forEach(k => { if (!Array.isArray(d[k])) d[k] = []; });
+  ['identities', 'habits', 'bad', 'tasks', 'goals', 'quotes'].forEach(k => { if (!Array.isArray(d[k])) d[k] = []; });
   if (!d.days || typeof d.days !== 'object') d.days = {};
+  if (!Array.isArray(d.settings.quoteCats)) d.settings.quoteCats = Object.keys(QCATS);
   for (const h of d.habits) { if (!Array.isArray(h.days)) h.days = ALL_DAYS.slice(); if (!h.laws) h.laws = {}; if (!h.since) h.since = d.created; }
   return d;
 }
@@ -754,6 +824,24 @@ function lvl(xp) {
 }
 const rankOf = L => RANKS[Math.min(L - 1, RANKS.length - 1)];
 
+const strHash = str => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+function quotePool(prefer) {
+  const on = new Set(S.settings.quoteCats || []);
+  const all = QUOTES.concat(S.quotes.map(q => Object.assign({ cat: 'mine' }, q))).filter(q => on.has(q.cat));
+  const pref = prefer ? all.filter(q => prefer.includes(q.cat)) : [];
+  return pref.length ? pref : all;
+}
+/* Same quote all day unless you ask for another; overlays draw their own seed. */
+function pickQuote(seed, prefer) {
+  const pool = quotePool(prefer);
+  return pool.length ? pool[strHash(String(seed)) % pool.length] : null;
+}
+function quoteLine(q) {
+  if (!q) return '';
+  const src = qSource(q);
+  return `<figure class="qline"><blockquote>${esc(q.t)}</blockquote><figcaption>${esc(q.a)}${src ? ` · ${esc(src)}` : ''}</figcaption></figure>`;
+}
+
 function badStats(b) {
   const tk = todayKey(), mon = mondayOf(tk), start = b.since > S.created ? b.since : S.created;
   const sum = (from, to) => { let n = 0, a = 0; for (let k = from; k <= to; k = addDays(k, 1)) { const r = S.days[k]; if (!r) continue; for (const s of r.slips || []) if (s.badId === b.id) { n++; a += b.unit === 'min' ? (+s.amount || 0) : 1; } } return { n, a }; };
@@ -826,8 +914,9 @@ function levelUp(L) {
       <div class="eyebrow">New rank</div>
       <div style="font:800 40px/1 var(--font-d);letter-spacing:-.02em">${esc(rankOf(L))}</div>
       <p class="muted">You are not the person who started this. Keep voting for who you are becoming.</p>
+      ${quoteLine(pickQuote('lv' + L))}
     </div>
-    <button class="btn dawn block" data-act="close">Keep going</button>`);
+    <button class="btn accent block" data-act="close">Keep going</button>`);
   chime(2);
 }
 
@@ -905,7 +994,7 @@ function barChart(keys, scores, avg) {
 /* =========================================================
    Views
    ========================================================= */
-const ui = { view: 'today', htab: 'am', prog: 'week', progOff: 0, hz: 'week', gp: {}, showDone: false, confirm: '', exportText: '' };
+const ui = { qShift: 0, view: 'today', htab: 'am', prog: 'week', progOff: 0, hz: 'week', gp: {}, showDone: false, confirm: '', exportText: '' };
 const VIEWS = { today: vToday, habits: vHabits, tasks: vTasks, goals: vGoals, progress: vProgress, reflect: vReflect, prefs: vPrefs };
 
 function render() {
@@ -959,11 +1048,21 @@ function vToday() {
       <div class="tiny muted">Last 14 days. The dashed line is your 30-day average. Stay above it.</div>
     </div>
   </section>`;
-  const parts = { hero, checkin: checkinCard(rec), hl: highlightCard(rec, k), am: routineCard('am', rec, k), any: routineCard('any', rec, k), plan: planCard(rec, k), guard: guardCard(rec), pm: routineCard('pm', rec, k), reflect: reflectCta(rec, k) };
-  const order = ph === 'morning' ? ['hero', 'checkin', 'hl', 'am', 'plan', 'any', 'guard', 'pm', 'reflect']
-    : ph === 'afternoon' ? ['hero', 'hl', 'plan', 'guard', 'am', 'any', 'pm', 'reflect', 'checkin']
-    : ['hero', 'hl', 'pm', 'reflect', 'guard', 'plan', 'any', 'am', 'checkin'];
+  const parts = { hero, quote: quoteCard(k), checkin: checkinCard(rec), hl: highlightCard(rec, k), am: routineCard('am', rec, k), any: routineCard('any', rec, k), plan: planCard(rec, k), guard: guardCard(rec), pm: routineCard('pm', rec, k), reflect: reflectCta(rec, k) };
+  const order = ph === 'morning' ? ['hero', 'quote', 'checkin', 'hl', 'am', 'plan', 'any', 'guard', 'pm', 'reflect']
+    : ph === 'afternoon' ? ['hero', 'hl', 'quote', 'plan', 'guard', 'am', 'any', 'pm', 'reflect', 'checkin']
+    : ['hero', 'hl', 'quote', 'pm', 'reflect', 'guard', 'plan', 'any', 'am', 'checkin'];
   return order.map(p => parts[p]).join('');
+}
+function quoteCard(k) {
+  const q = pickQuote(k + ':' + ui.qShift);
+  if (!q) return '';
+  const src = qSource(q);
+  return `<section class="quote" aria-label="Quote">
+    <div class="row between"><span class="qtag">${esc(QCATS[q.cat])}</span><button class="qn" data-act="q-next" aria-label="Show another quote">Another ↻</button></div>
+    <blockquote>${esc(q.t)}</blockquote>
+    <div class="who">${esc(q.a)}${src && src !== QCATS[q.cat] ? ` · ${esc(src)}` : ''}</div>
+  </section>`;
 }
 function checkinCard(rec) {
   const en = Object.keys(ENERGY).map(e => {
@@ -995,7 +1094,7 @@ function highlightCard(rec, k) {
     const sug = hlSuggestions(k);
     return `<section class="card hl">
       <div class="ch"><div><div class="eyebrow"><span class="star">★</span> Highlight</div><h2>What one thing would make today a win?</h2></div><div class="side">+${XP.highlight} XP</div></div>
-      <form class="inline" data-form="hl"><input name="text" id="hlText" maxlength="120" placeholder="e.g. Finish the e-portfolio entry" autocomplete="off"><button class="btn dawn">Set</button></form>
+      <form class="inline" data-form="hl"><input name="text" id="hlText" maxlength="120" placeholder="e.g. Finish the e-portfolio entry" autocomplete="off"><button class="btn accent">Set</button></form>
       ${sug.length ? `<div class="chips">${sug.map(s => `<button class="chip" data-act="hl-pick" data-text="${esc(s.text)}" data-task="${s.taskId || ''}">${esc(s.text)} <small>${esc(s.tag)}</small></button>`).join('')}</div>` : ''}
       <p class="tiny muted">Choose by urgency, satisfaction or joy. Just one. Everything else is a bonus.</p>
     </section>`;
@@ -1007,7 +1106,7 @@ function highlightCard(rec, k) {
     ${t ? `<div class="tiny muted">From your task list · ${URG_NAME[t.urgency]}</div>` : ''}
     <div class="row">
       ${hl.done ? `<span class="hl-done">${I.check.replace('<svg', '<svg width="18" height="18"')} Done. Today counts.</span><button class="link" data-act="hl-done">undo</button>`
-        : `<button class="btn dawn" data-act="hl-done">${I.check.replace('<svg', '<svg width="16" height="16"')} Done</button>
+        : `<button class="btn leaf" data-act="hl-done">${I.check.replace('<svg', '<svg width="16" height="16"')} Done</button>
            <button class="btn ghost" data-act="laser" data-min="25" data-label="${esc(hl.text)}">Laser 25</button>
            <button class="btn ghost" data-act="laser" data-min="50" data-label="${esc(hl.text)}">Laser 50</button>
            <button class="link" data-act="hl-clear">change</button>`}
@@ -1047,7 +1146,7 @@ function routineCard(r, rec, k) {
   const sub = r === 'am' ? `Wake ${esc(S.settings.wake)}` : r === 'pm' ? `Bed ${esc(S.settings.bed)}${toMin(S.settings.bed) !== null ? ` · screens off ${fromMin(toMin(S.settings.bed) - 45)}` : ''}` : 'Any time today';
   return `<section class="card">
     <div class="ch"><div class="titlerow">${icon}<div><div class="eyebrow">${sub}</div><h2>${title}</h2></div></div><div class="side">${done}/${list.length} done<br>${done === list.length && list.length ? 'complete' : `${left} XP left`}</div></div>
-    <div class="bar ${r === 'pm' ? 'dusk' : ''}"><i style="width:${list.length ? done / list.length * 100 : 0}%"></i></div>
+    <div class="bar ${r === 'pm' ? '' : 'leaf'}"><i style="width:${list.length ? done / list.length * 100 : 0}%"></i></div>
     <div class="hlist">${list.map(h => habitRow(h, rec, k)).join('') || `<div class="empty">No habits in this routine yet. <button class="link" data-act="h-new" data-r="${r}">Add one</button></div>`}</div>
     <p class="tiny muted">Full earns full XP. The 2-minute version keeps the streak alive on hard days.</p>
   </section>`;
@@ -1093,10 +1192,10 @@ function guardCard(rec) {
 }
 function reflectCta(rec, k) {
   const r = rec.reflection;
-  return `<section class="card" style="background:var(--dusk-soft)">
+  return `<section class="card" style="background:var(--violet-soft)">
     <div class="ch"><div class="titlerow"><span class="moon" style="background:var(--surface)">${I.moon}</span><div><div class="eyebrow">Make Time · reflect</div><h2>${r ? 'Day reflected' : 'Close the day'}</h2></div></div><div class="side">${r ? 'done' : `+${XP.reflect} XP`}</div></div>
     ${r ? `<p class="small">${r.tomorrow ? `Tomorrow’s Highlight: <b>${esc(r.tomorrow)}</b>` : 'Reflection saved.'}${r.adjust ? `<br>Adjusting: ${esc(r.adjust)}` : ''}</p><div><button class="btn ghost sm" data-act="nav" data-v="reflect">Edit reflection</button></div>`
-      : `<p class="small">Two minutes. What worked, what got in the way, and the one thing to change tomorrow.</p><div><button class="btn dusk" data-act="nav" data-v="reflect">Reflect now</button></div>`}
+      : `<p class="small">Two minutes. What worked, what got in the way, and the one thing to change tomorrow.</p><div><button class="btn accent" data-act="nav" data-v="reflect">Reflect now</button></div>`}
   </section>`;
 }
 
@@ -1369,7 +1468,7 @@ function progMonth() {
     const k = fmtKey(new Date(y, m, d)), s = dayScore(k), r = peek(k);
     if (s !== null && s >= 70) strongN++;
     const cls = k > tk ? 'fut' : s === null ? 'pre' : '';
-    const bg = s !== null ? `background:color-mix(in srgb,var(--dawn) ${Math.round(12 + s * 0.88)}%,var(--surface-2));` : '';
+    const bg = s !== null ? `background:color-mix(in srgb,var(--violet) ${Math.round(12 + s * 0.88)}%,var(--surface-2));` : '';
     cells += `<button class="cday ${cls} ${k === tk ? 'today' : ''}" style="${bg}" data-act="day-open" data-k="${k}" aria-label="${dateShort(k)}${s !== null ? `, score ${s}` : ''}"><span>${d}</span>${s !== null ? `<b>${s}</b>` : ''}${r && r.highlight && r.highlight.done ? '<span class="hd" title="Highlight won"></span>' : ''}</button>`;
   }
   const hbars = S.habits.map(h => {
@@ -1382,7 +1481,7 @@ function progMonth() {
   return `<section class="card">
       <div class="pnav"><button class="btn ghost sm" data-act="prog-nav" data-d="-1" aria-label="Previous month">‹</button><div><h2>${MONTHS[m]} ${y}</h2><span class="sub">${strongN} strong ${strongN === 1 ? 'day' : 'days'} (70+)${ui.progOff ? ` · <button class="link" data-act="prog-nav" data-d="0">this month</button>` : ''}</span></div><button class="btn ghost sm" data-act="prog-nav" data-d="1" ${ui.progOff >= 0 ? 'disabled' : ''} aria-label="Next month">›</button></div>
       <div class="cal">${cells}</div>
-      <div class="key"><span><span class="c" style="background:color-mix(in srgb,var(--dawn) 25%,var(--surface-2))"></span>low score</span><span><span class="c" style="background:var(--dawn)"></span>high score</span><span><span class="c" style="background:var(--ink);border-radius:50%;width:8px;height:8px"></span>Highlight won</span></div>
+      <div class="key"><span><span class="c" style="background:color-mix(in srgb,var(--violet) 25%,var(--surface-2))"></span>low score</span><span><span class="c" style="background:var(--violet)"></span>high score</span><span><span class="c" style="background:var(--ink);border-radius:50%;width:8px;height:8px"></span>Highlight won</span></div>
       ${tilesHtml(c, p, 'month')}
     </section>
     <section class="card">
@@ -1417,7 +1516,7 @@ function vReflect() {
         <label class="q"><span class="ql">One thing I’ll adjust tomorrow</span><input name="adjust" id="rfAdjust" maxlength="160" placeholder="e.g. Phone in the hallway before the study block" value="${esc(r.adjust || '')}"></label>
         <label class="q"><span class="ql">Tomorrow’s Highlight</span><input name="tomorrow" id="rfTomorrow" maxlength="120" placeholder="The one thing that makes tomorrow a win" value="${esc(r.tomorrow || '')}"><span class="tiny muted">It will be waiting for you in the morning.</span></label>
         <label class="q"><span class="ql">Grateful for</span><input name="grateful" id="rfGrateful" maxlength="160" value="${esc(r.grateful || '')}"></label>
-        <button class="btn dusk block">${rec.reflection ? 'Update reflection' : `Close the day · +${XP.reflect} XP`}</button>
+        <button class="btn accent block">${rec.reflection ? 'Update reflection' : `Close the day · +${XP.reflect} XP`}</button>
       </form>
     </section>
     ${past.length ? `<section class="card"><div class="ch"><div><div class="eyebrow">Recent</div><h2>Past reflections</h2></div></div><div class="past">${past.map(x => `<div class="pastr"><span class="eyebrow">${dateShort(x.k)}${x.r.energy ? ` · energy ${x.r.energy}/5` : ''}${x.r.focus ? ` · focus ${x.r.focus}/5` : ''}</span>${x.r.win ? `<div><b>Win:</b> ${esc(x.r.win)}</div>` : ''}${(x.r.blocks || []).length ? `<div><b>In the way:</b> ${x.r.blocks.map(esc).join(', ')}</div>` : ''}${x.r.adjust ? `<div><b>Adjust:</b> ${esc(x.r.adjust)}</div>` : ''}</div>`).join('')}</div></section>` : ''}`;
@@ -1447,6 +1546,15 @@ function vPrefs() {
       </form>
       <div class="field"><span>Theme</span>${seg('theme', [['system', 'System'], ['light', 'Light'], ['dark', 'Dark']])}</div>
       <div class="field"><span>Sounds</span>${seg('sound', [['true', 'On'], ['false', 'Off']])}</div>
+    </section>
+    <section class="card">
+      <div class="ch"><div><div class="eyebrow">Inspiration</div><h2>Quotes</h2></div><div class="side">${quotePool().length} in rotation</div></div>
+      <p class="small muted">Choose which quotes appear on Today, in Laser focus, when you ride out an urge, and when you level up.</p>
+      <div class="chips">${Object.entries(QCATS).map(([c, l]) => `<button class="chip ${(st.quoteCats || []).includes(c) ? 'on' : ''}" data-act="qcat" data-c="${c}" aria-pressed="${(st.quoteCats || []).includes(c)}">${esc(l)} <small>${c === 'mine' ? S.quotes.length : QUOTES.filter(q => q.cat === c).length}</small></button>`).join('')}</div>
+      <form class="stack" data-form="quotes" style="gap:8px">
+        <label class="field"><span>Your own quotes, one per line, as: quote — who said it</span><textarea name="mine" id="pfQuotes" rows="4" placeholder="Average is a choice. — Me">${esc(S.quotes.map(q => q.a ? `${q.t} — ${q.a}` : q.t).join('\n'))}</textarea></label>
+        <div><button class="btn">Save my quotes</button></div>
+      </form>
     </section>
     <section class="card">
       <div class="ch"><div><div class="eyebrow">Data</div><h2>Back up and restore</h2></div></div>
@@ -1567,7 +1675,7 @@ function mLaserPick() {
     <label class="field"><span>Focus on</span><input name="label" id="lzLabelIn" maxlength="100" value="${esc(label)}" placeholder="Deep work"></label>
     <div class="field"><span>Minutes</span><div class="chips">${[15, 25, 50, 90].map(m => `<label class="chip"><input type="radio" name="min" value="${m}" ${m === 25 ? 'checked' : ''}>${m} min</label>`).join('')}</div></div>
     <p class="tiny muted">Phone face-down in another room. Close every tab you don’t need. Leaving this screen is counted.</p>
-    <button class="btn dawn block">Start</button>
+    <button class="btn accent block">Start</button>
   </form>`);
 }
 function mDay(k) {
@@ -1600,7 +1708,8 @@ function showLaser() {
     <div class="lbl">${esc(f.label)}</div>
     <div class="lzring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="tr" cx="50" cy="50" r="46"/><circle class="pr" id="lzPr" cx="50" cy="50" r="46" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg><div class="clock" id="lzClock">--:--</div></div>
     <div class="lzmsg" id="lzMsg">Phone away. Just this.</div>
-    <div class="row"><button class="btn ghost" id="lzPause" data-act="lz-pause">Pause</button><button class="btn dawn" data-act="lz-done">Finish</button><button class="btn ghost" data-act="lz-abort">Abandon</button></div>`;
+    ${quoteLine(pickQuote(f.id, ['discipline', 'naruto', 'dbz', 'onepiece', 'demonslayer', 'ronaldo']))}
+    <div class="row"><button class="btn ghost" id="lzPause" data-act="lz-pause">Pause</button><button class="btn accent" data-act="lz-done">Finish</button><button class="btn ghost" data-act="lz-abort">Abandon</button></div>`;
   $('#laser').hidden = false; document.body.style.overflow = 'hidden';
   clearInterval(lzTimer); lzTimer = setInterval(lzTick, 250); lzTick();
   try { navigator.wakeLock && navigator.wakeLock.request('screen').then(l => { wakeLock = l; }).catch(() => {}); } catch (e) {}
@@ -1643,9 +1752,10 @@ function urgeOpen() {
     <div class="breath"><i></i><b id="urgeT">1:30</b><small id="urgeB">breathe in</small></div>
     <div class="lbl">${esc(identityOfDay(k))}</div>
     <p class="lzmsg">Urges peak and fade. Breathe with the circle and let this one pass without acting on it.</p>
+    ${quoteLine(pickQuote('urge' + Date.now(), ['discipline', 'naruto', 'dbz', 'onepiece', 'demonslayer', 'ronaldo']))}
     <div class="swap">${swap}</div>
     ${S.bad.length > 1 ? `<div class="chips" style="justify-content:center">${S.bad.map(b => `<button class="chip ${b.id === urgeBad ? 'on' : ''}" data-act="urge-bad" data-id="${b.id}">${esc(b.name)}</button>`).join('')}</div>` : ''}
-    <div class="row"><button class="btn dawn" data-act="urge-win">I rode it out · +${XP.urge} XP</button><button class="btn ghost" data-act="urge-lose">I gave in</button></div>
+    <div class="row"><button class="btn leaf" data-act="urge-win">I rode it out · +${XP.urge} XP</button><button class="btn ghost" data-act="urge-lose">I gave in</button></div>
     <button class="link" data-act="urge-close">close</button>`;
   $('#urge').hidden = false; document.body.style.overflow = 'hidden';
   clearInterval(urgeTimer); urgeTimer = setInterval(urgeTick, 250); urgeTick();
@@ -1678,24 +1788,24 @@ function onboard() {
     <h1>Not average.<br><em>Better than yesterday.</em></h1>
     <p>This is where you track your routines, habits, goals, tasks and focus, and see every day whether you are moving forward. It runs on two ideas: Atomic Habits (every habit is a vote for who you are becoming) and Make Time (one Highlight a day, protected with focus).</p>
     <label class="field"><span>What should we call you? (optional)</span><input id="obName" maxlength="30" value="${esc(S.name)}" placeholder="First name"></label>
-    <button class="btn dawn block" data-act="ob-next">Start</button>`;
+    <button class="btn accent block" data-act="ob-next">Start</button>`;
   if (st === 1) body = `<div class="eyebrow">Step 1 · identity</div>
     <h1>Who are you becoming?</h1>
     <p>Write identity statements, one per line, starting with “I am someone who…”. Every habit you complete is a vote for one of them. Edit these examples or replace them.</p>
     <textarea id="obIds" rows="6">${esc(S.identities.map(i => i.text).join('\n'))}</textarea>
-    <div class="row"><button class="btn ghost" data-act="ob-back">Back</button><button class="btn dawn grow" data-act="ob-next">Next</button></div>`;
+    <div class="row"><button class="btn ghost" data-act="ob-back">Back</button><button class="btn accent grow" data-act="ob-next">Next</button></div>`;
   if (st === 2) body = `<div class="eyebrow">Step 2 · routines</div>
     <h1>Your morning and evening.</h1>
     <div class="row"><label class="field grow"><span>Wake time</span><input type="time" id="obWake" value="${esc(S.settings.wake)}"></label><label class="field grow"><span>Bedtime</span><input type="time" id="obBed" value="${esc(S.settings.bed)}"></label></div>
     <p class="small muted">Starter habits, each with a cue, a full version and a 2-minute version. Untick any you don’t want; you can edit all of it later.</p>
     <div class="pick">${HABIT_LIB.map(h => `<label><input type="checkbox" name="obh" value="${h.id}" ${S.habits.some(x => x.id === h.id) ? 'checked' : ''}><span><b>${h.routine === 'am' ? '☀' : '☾'} ${esc(h.name)}</b><small>${esc(h.cue)} → ${esc(lc(h.full))}. 2-min: ${esc(lc(h.min))}.</small></span></label>`).join('')}</div>
-    <div class="row"><button class="btn ghost" data-act="ob-back">Back</button><button class="btn dawn grow" data-act="ob-next">Next</button></div>`;
+    <div class="row"><button class="btn ghost" data-act="ob-back">Back</button><button class="btn accent grow" data-act="ob-next">Next</button></div>`;
   if (st === 3) body = `<div class="eyebrow">Step 3 · dopamine traps</div>
     <h1>What do you want to stop?</h1>
     <p>Pick the habits that steal your time. You’ll log every slip and every urge you beat, and see the true cost add up.</p>
     <div class="pick">${BAD_LIB.map(b => `<label><input type="checkbox" name="obb" value="${b.id}" ${S.bad.some(x => x.id === b.id) ? 'checked' : ''}><span><b>${esc(b.name)}</b><small>${esc(b.difficult)}</small></span></label>`).join('')}</div>
     <p class="tiny muted">The starter tasks and goals are marked “example”. Remove them from the Tasks page whenever you like.</p>
-    <div class="row"><button class="btn ghost" data-act="ob-back">Back</button><button class="btn dawn grow" data-act="ob-finish">Begin day one</button></div>`;
+    <div class="row"><button class="btn ghost" data-act="ob-back">Back</button><button class="btn accent grow" data-act="ob-finish">Begin day one</button></div>`;
   $('#onb').innerHTML = `<div class="onb-in">${steps}${body}</div>`;
   $('#onb').hidden = false;
 }
@@ -1763,6 +1873,12 @@ const ACT = {
   nav: (a, e) => { e.preventDefault(); closeSheet(); go(a.dataset.v); },
   close: () => closeSheet(),
   htab: a => { ui.htab = a.dataset.v; render(); },
+  'q-next': () => { ui.qShift++; render(); },
+  qcat: a => {
+    const c = a.dataset.c, on = new Set(S.settings.quoteCats || []);
+    if (on.has(c)) on.delete(c); else on.add(c);
+    S.settings.quoteCats = Object.keys(QCATS).filter(x => on.has(x)); save(); render();
+  },
   energy: a => { const rec = day(); rec.energy = rec.energy === +a.dataset.n ? null : +a.dataset.n; save(); render(); },
   'hl-pick': a => setHighlight(a.dataset.text, a.dataset.task),
   'hl-clear': () => { const rec = day(); rec.highlight = null; save(); render(); },
@@ -1970,6 +2086,14 @@ const FORMS = {
       if (ys !== null && sc > ys) setTimeout(() => award('beat', 'beat', `Better than yesterday (${sc} vs ${ys})`, XP.beat, null, `Better than yesterday: ${sc} vs ${ys}. +${XP.beat} bonus XP`), 900);
     } else toast('Reflection updated');
     go('today');
+  },
+  quotes: f => {
+    S.quotes = f.elements.mine.value.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+      const m = /^(.*?)\s+[—–-]\s+([^—–-]+)$/.exec(l);
+      return m ? { t: m[1].replace(/^["“]|["”]$/g, ''), a: m[2].trim() } : { t: l.replace(/^["“]|["”]$/g, ''), a: '' };
+    });
+    if (S.quotes.length && !S.settings.quoteCats.includes('mine')) S.settings.quoteCats.push('mine');
+    save(); render(); toast(`${plural(S.quotes.length, 'quote')} of your own saved`);
   },
   ids: f => {
     S.identities.forEach(i => { const inp = f.elements['id-' + i.id]; if (inp) i.text = inp.value.trim() || i.text; });
