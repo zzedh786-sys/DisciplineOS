@@ -106,7 +106,7 @@ main{max-width:760px;margin:0 auto;padding-block:18px 110px;padding-left:max(16p
 .tab.on svg{color:var(--violet)}
 @media (min-width:960px){
   .shell{display:grid;grid-template-columns:200px minmax(0,1fr);gap:24px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-  .rail{display:grid;align-content:start;gap:2px;position:sticky;top:calc(64px + env(safe-area-inset-top,0px));padding-top:18px;height:max-content}
+  .rail{display:grid;align-content:start;gap:2px;position:sticky;top:calc(var(--hdr,57px) + env(safe-area-inset-top,0px));padding-top:18px;height:max-content}
   .rail .tab{grid-template-columns:22px 1fr;justify-items:start;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:14px}
   .rail .tab:hover{background:var(--surface)}
   .rail .tab.on{background:var(--surface);box-shadow:inset 0 0 0 1px var(--line)}
@@ -202,6 +202,23 @@ svg.spark{width:100%;height:auto;display:block;overflow:visible}
 .spark .avgt,.chart .avgt{fill:var(--ink-3);font:500 9.5px var(--font-m)}
 .spark .endp{fill:var(--violet);stroke:var(--surface);stroke-width:2}
 .spark .dot{fill:var(--ink)}
+
+/* ---------- pinned line ---------- */
+.pin{display:block;width:100%;text-align:left;border-top:1px solid var(--line);background:var(--violet-soft);color:var(--ink)}
+.pin-in{max-width:1100px;margin:0 auto;display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 10px;padding-block:7px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.pin svg{width:15px;height:15px;flex:none;color:var(--leaf-ink);align-self:center}
+.pin .pt{font:700 13.5px/1.3 var(--font-d);letter-spacing:-.005em;min-width:0;flex:1 1 220px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pin .pa{font:500 11px/1.3 var(--font-m);color:var(--violet-ink);white-space:nowrap}
+@media (min-width:960px){.pin-in{padding-left:max(16px,env(safe-area-inset-left,0px))}}
+
+/* ---------- slip insight ---------- */
+.why{display:grid;gap:10px}
+.why .eyebrow{margin-bottom:5px}
+.chip.feel{background:var(--violet-soft);color:var(--violet-ink)}
+.chip.feel:has(input:checked){background:var(--violet);color:var(--on-violet)}
+.fix{font-size:13.5px;padding:10px 12px;border-radius:10px;background:var(--leaf-soft);color:var(--ink)}
+.fix b{color:var(--leaf-ink)}
+.err{font-size:13px;font-weight:600;color:var(--bad)}
 
 /* ---------- quotes ---------- */
 .quote{position:relative;overflow:hidden;display:grid;gap:12px;padding:18px;border-radius:var(--r);background:var(--grad);color:var(--on-grad);box-shadow:var(--shadow)}
@@ -492,7 +509,9 @@ table.hg td{padding:0}
     <div class="lvchip" id="hLv"><span class="lv" id="hLvN">L1</span><span class="meta"><span class="rk" id="hRank">Starter</span><span class="bar"><i id="hBar"></i></span></span><span class="xp" id="hXp">0 XP</span></div>
     <button class="iconbtn" data-act="nav" data-v="prefs" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </div>
-</div></header>
+</div>
+  <button class="pin" id="hPin" hidden data-act="nav" data-v="prefs" aria-label="Pinned quote. Change it in Settings."></button>
+</header>
 
 <div class="shell">
   <nav class="rail" id="rail" aria-label="Sections"></nav>
@@ -594,7 +613,34 @@ function periodLabel(hz, p) {
 const ALL_DAYS = [0, 1, 2, 3, 4, 5, 6];
 const ENERGY = { sleep: 'Sleep', move: 'Move', food: 'Fuel', light: 'Daylight' };
 const BLOCKERS = ['Phone / scrolling', 'Tired', 'Poor sleep', 'Over-planned', 'Interruptions', 'Low mood', 'Work overran', 'Procrastinated'];
-const TRIGGERS = ['Bored', 'Tired', 'Stressed', 'Avoiding work', 'Notification', 'In bed', 'Lonely', 'Habit / autopilot'];
+/* Slip check-in: why it happened, how it felt, and the counter-move for next time. */
+const REASONS = [
+  ['Felt tired', 'Tired is a signal, not an order. Next time swap to the 2-minute version of a habit, or go to bed early.'],
+  ['Easier than my planned task', 'The task felt too big. Shrink it: open it and do just two minutes. Starting is the hard part.'],
+  ['Avoiding something hard', 'Name the hard thing, then do the smallest first step on a 10-minute Laser timer.'],
+  ['Bored', 'Keep one 2-minute alternative ready: a page of a book, a short walk, 10 press-ups.'],
+  ['Stressed or overwhelmed', 'Scrolling numbs stress but never fixes it. Ride the urge for 90 seconds or step outside.'],
+  ['Wanted a reward', 'Pick a better reward and earn it: a coffee, a walk, an episode after the Highlight.'],
+  ['A notification pulled me in', 'Make it invisible: switch off notifications for this app today.'],
+  ['Autopilot, didn’t notice', 'Add friction: log out, move the app off the home screen, grayscale after 9pm.'],
+  ['Lonely, wanted connection', 'Message or call one real person instead. Real connection beats the feed.'],
+  ['In bed, couldn’t sleep', 'Phone charges outside the bedroom. Keep a book by the bed instead.'],
+  ['Hungry or craving', 'Have a better snack ready before you need it.'],
+];
+const REASON_FIX = Object.fromEntries(REASONS);
+const fixFor = r => REASON_FIX[r] || 'Name the cue, then remove one piece of friction before tomorrow.';
+const FEELINGS = ['Tired', 'Stressed', 'Anxious', 'Bored', 'Low or sad', 'Lonely', 'Frustrated', 'Restless', 'Overwhelmed', 'Fine', 'Happy'];
+const AFTER = [['worse', 'Worse'], ['same', 'No different'], ['better', 'Better']];
+/* Pinned on Today. Index -1 means the user's own line. */
+const ANTI_AVG = [
+  { t: 'The difference between ordinary and extraordinary is that little extra.', a: 'Jimmy Johnson' },
+  { t: 'I don’t want to be average. I want to be better than I was yesterday.', a: 'Your own words' },
+  { t: 'Good is the enemy of great.', a: 'Jim Collins, Good to Great' },
+  { t: 'Be so good they can’t ignore you.', a: 'Steve Martin' },
+  { t: 'If you think you’re perfect already, then you never will be.', a: 'Cristiano Ronaldo' },
+  { t: 'A dropout will beat a genius through hard work.', a: 'Rock Lee, Naruto' },
+  { t: 'There is nothing noble in being superior to your fellow man; true nobility is being superior to your former self.', a: 'W. L. Sheldon' },
+];
 const URG = ['urgent', 'semi', 'routine'];
 const URG_NAME = { routine: 'Routine', semi: 'Semi-urgent', urgent: 'Urgent' };
 const XP = { highlight: 50, reflect: 15, beat: 10, urge: 5, urgeCap: 10, task: { routine: 10, semi: 20, urgent: 30 }, goal: { day: 15, week: 40, month: 100, quarter: 250, year: 600 } };
@@ -715,7 +761,7 @@ function defaults() {
     bad: BAD_LIB.slice(0, 3).map(b => Object.assign({}, b, { since: tk })),
     tasks, goals: [gY1, gY2, gQ, gM, gW, gD],
     days: {}, focusRun: null, quotes: [],
-    settings: { theme: 'system', rollover: 3, wake: '06:30', bed: '22:30', sound: true, quoteCats: Object.keys(QCATS) },
+    settings: { theme: 'system', rollover: 3, wake: '06:30', bed: '22:30', sound: true, quoteCats: Object.keys(QCATS), pin: 0, pinText: '', pinBy: '' },
   };
 }
 
@@ -842,6 +888,34 @@ function quoteLine(q) {
   return `<figure class="qline"><blockquote>${esc(q.t)}</blockquote><figcaption>${esc(q.a)}${src ? ` · ${esc(src)}` : ''}</figcaption></figure>`;
 }
 
+const slipReasons = s => (s.reasons && s.reasons.length ? s.reasons : s.trig || []).concat(s.other ? [s.other] : []);
+/* Tally reasons, feelings and after-effects across slip check-ins (repeat counts logged with one check-in are skipped). */
+function slipInsight(from, to, badId) {
+  const reasons = {}, feels = {}, after = { worse: 0, same: 0, better: 0 };
+  let n = 0;
+  for (let k = from; k <= to; k = addDays(k, 1)) {
+    const r = S.days[k]; if (!r) continue;
+    for (const s of r.slips || []) {
+      if (s.dup || (badId && s.badId !== badId)) continue;
+      n++;
+      slipReasons(s).forEach(x => { reasons[x] = (reasons[x] || 0) + 1; });
+      (s.feel || []).forEach(x => { feels[x] = (feels[x] || 0) + 1; });
+      if (s.after && after[s.after] !== undefined) after[s.after]++;
+    }
+  }
+  const top = o => Object.entries(o).sort((a, b) => b[1] - a[1]);
+  return { n, reasons: top(reasons), feels: top(feels), after };
+}
+function insightHtml(ins, opts = {}) {
+  if (!ins.n || (!ins.reasons.length && !ins.feels.length)) return opts.empty || '';
+  const rated = ins.after.worse + ins.after.same + ins.after.better;
+  return `<div class="why">
+    ${ins.reasons.length ? `<div><div class="eyebrow">Why it happened</div><div class="chips">${ins.reasons.slice(0, opts.max || 4).map(([r, c]) => `<span class="chip">${esc(r)} <small>×${c}</small></span>`).join('')}</div></div>` : ''}
+    ${ins.feels.length ? `<div><div class="eyebrow">How you felt before</div><div class="chips">${ins.feels.slice(0, opts.max || 4).map(([r, c]) => `<span class="chip feel">${esc(r)} <small>×${c}</small></span>`).join('')}</div></div>` : ''}
+    ${rated ? `<div class="small"><b>Felt worse afterwards ${ins.after.worse} of ${rated} ${rated === 1 ? 'time' : 'times'}.</b>${ins.after.better ? ` Better ${ins.after.better}.` : ''} ${ins.after.worse > rated / 2 ? 'It doesn’t even deliver what it promises.' : ''}</div>` : ''}
+    ${ins.reasons.length ? `<div class="fix"><b>Next move:</b> ${esc(fixFor(ins.reasons[0][0]))}</div>` : ''}
+  </div>`;
+}
 function badStats(b) {
   const tk = todayKey(), mon = mondayOf(tk), start = b.since > S.created ? b.since : S.created;
   const sum = (from, to) => { let n = 0, a = 0; for (let k = from; k <= to; k = addDays(k, 1)) { const r = S.days[k]; if (!r) continue; for (const s of r.slips || []) if (s.badId === b.id) { n++; a += b.unit === 'min' ? (+s.amount || 0) : 1; } } return { n, a }; };
@@ -852,7 +926,7 @@ function badStats(b) {
   const clean = last ? daysBetween(last, tk) : daysBetween(start, tk);
   let urges = 0; for (let k = mon; k <= tk; k = addDays(k, 1)) { const r = S.days[k]; if (r) urges += (r.urges || []).filter(u => u.badId === b.id).length; }
   const tracked = strip.filter(s => !s.pre), total = tracked.reduce((a, s) => a + s.a, 0);
-  const perYear = tracked.length ? total / tracked.length * 365 : 0;
+  const perYear = tracked.length >= 3 ? total / tracked.length * 365 : 0;
   return { today: sum(tk, tk), week: sum(mon, tk), prev: sum(addDays(mon, -7), addDays(mon, -1)), strip, clean, last, urges, perYear };
 }
 
@@ -1007,7 +1081,15 @@ function go(v) {
   try { history.replaceState(null, '', '#' + v); } catch (e) {}
   render(); window.scrollTo(0, 0);
 }
+function pinQuote() {
+  const st = S.settings;
+  if (st.pin === -1 && st.pinText) return { t: st.pinText, a: st.pinBy };
+  return ANTI_AVG[clamp(+st.pin || 0, 0, ANTI_AVG.length - 1)];
+}
 function hud() {
+  const pq = pinQuote(), pin = $('#hPin');
+  pin.hidden = ui.view !== 'today';
+  pin.innerHTML = `<span class="pin-in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 18h18" stroke="currentColor" stroke-width="1.6" stroke-dasharray="2.5 2.5"/><path d="M4 15l5-6 4 3 7-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="pt">${esc(pq.t)}</span>${pq.a ? `<span class="pa">${esc(pq.a)}</span>` : ''}</span>`;
   const l = lvl(S.xp);
   $('#hLvN').textContent = 'L' + l.L;
   $('#hRank').textContent = rankOf(l.L);
@@ -1266,6 +1348,7 @@ function badView() {
         </div>
         <div><div class="row between tiny muted" style="margin-bottom:4px"><span>Last 28 days</span><span>${dm(st.strip[0].k)} – today</span></div><div class="strip">${st.strip.map(s => `<i class="${lvlOf(s)}" title="${dateShort(s.k)}: ${s.a ? amt(b, s.a) : 'clean'}"></i>`).join('')}</div></div>
         ${b.unit === 'min' && st.perYear >= 60 ? `<div class="cost">At this rate that is ${Math.round(st.perYear / 60)} hours a year. That is ${Math.round(st.perYear / 60 / 8)} full working days.</div>` : ''}
+        ${insightHtml(slipInsight(addDays(todayKey(), -29), todayKey(), b.id))}
         <dl class="laws" style="margin:0"><dt>Invisible</dt><dd>${esc(b.invisible) || '—'}</dd><dt>Unattractive</dt><dd>${esc(b.unattractive) || '—'}</dd><dt>Difficult</dt><dd>${esc(b.difficult) || '—'}</dd><dt>Unsatisfying</dt><dd>${esc(b.unsatisfying) || '—'}</dd></dl>
         <div class="row"><button class="btn" data-act="urge-win" data-id="${b.id}">Urge resisted +${XP.urge}</button><button class="btn danger" data-act="slip" data-id="${b.id}">Log a slip</button></div>
       </section>`;
@@ -1452,6 +1535,7 @@ function progWeek() {
       </tbody></table></div>
       <div class="key"><span><span class="c full"></span>full</span><span><span class="c min"></span>2-min</span><span><span class="c miss"></span>missed</span><span><span class="c off"></span>rest day</span><span><span class="c s0"></span>clean</span><span><span class="c s2"></span>slipped (minutes or count)</span></div>
     </section>
+    ${(() => { const ins = slipInsight(mon, sun); return ins.n ? `<section class="card"><div class="ch"><div><div class="eyebrow">Slip check-ins · ${plural(ins.n, 'slip')}</div><h2>Why you slipped this week</h2></div></div>${insightHtml(ins, { max: 6 })}</section>` : ''; })()}
     ${wins.length ? `<section class="card"><div class="ch"><div><div class="eyebrow">From your reflections</div><h2>What this week taught you</h2></div></div><div class="past">${wins.map(x => `<div class="pastr"><span class="eyebrow">${dateShort(x.k)}</span>${x.r.reflection.win ? `<div><b>Win:</b> ${esc(x.r.reflection.win)}</div>` : ''}${x.r.reflection.adjust ? `<div><b>Adjust:</b> ${esc(x.r.reflection.adjust)}</div>` : ''}</div>`).join('')}</div></section>` : ''}`;
 }
 function progMonth() {
@@ -1548,6 +1632,16 @@ function vPrefs() {
       <div class="field"><span>Sounds</span>${seg('sound', [['true', 'On'], ['false', 'Off']])}</div>
     </section>
     <section class="card">
+      <div class="ch"><div><div class="eyebrow">Always on Today</div><h2>Your not-average line</h2></div></div>
+      <p class="small muted">Pinned under the header on Today so it stays in view while you scroll.</p>
+      <form class="stack" data-form="pin" style="gap:8px">
+        <div class="pick">${ANTI_AVG.map((q, i) => `<label><input type="radio" name="pin" value="${i}" ${+st.pin === i ? 'checked' : ''}><span><b>${esc(q.t)}</b><small>${esc(q.a)}</small></span></label>`).join('')}
+          <label><input type="radio" name="pin" value="-1" ${+st.pin === -1 ? 'checked' : ''}><span><b>My own line</b><small>Write it below</small></span></label></div>
+        <div class="row"><input name="pinText" id="pfPinText" class="grow" maxlength="140" placeholder="e.g. Average is a choice. I don’t choose it." value="${esc(st.pinText)}"><input name="pinBy" id="pfPinBy" style="flex:0 1 160px" maxlength="40" placeholder="Who said it" value="${esc(st.pinBy)}"></div>
+        <div><button class="btn">Pin it</button></div>
+      </form>
+    </section>
+    <section class="card">
       <div class="ch"><div><div class="eyebrow">Inspiration</div><h2>Quotes</h2></div><div class="side">${quotePool().length} in rotation</div></div>
       <p class="small muted">Choose which quotes appear on Today, in Laser focus, when you ride out an urge, and when you level up.</p>
       <div class="chips">${Object.entries(QCATS).map(([c, l]) => `<button class="chip ${(st.quoteCats || []).includes(c) ? 'on' : ''}" data-act="qcat" data-c="${c}" aria-pressed="${(st.quoteCats || []).includes(c)}">${esc(l)} <small>${c === 'mine' ? S.quotes.length : QUOTES.filter(q => q.cat === c).length}</small></button>`).join('')}</div>
@@ -1617,14 +1711,50 @@ function mBad(b) {
 }
 function mSlip(id) {
   const b = badById(id) || S.bad[0]; if (!b) return;
-  openSheet('Log a slip', `<form class="stack" data-form="slip">
-    <div class="field"><span>What happened?</span><div class="chips">${S.bad.map(x => `<label class="chip"><input type="radio" name="bad" value="${x.id}" ${x.id === b.id ? 'checked' : ''}>${esc(x.name)}</label>`).join('')}</div></div>
-    <label class="field"><span>How much? (minutes for time-based habits, otherwise times)</span><input type="number" name="amount" id="slAmt" min="1" max="600" value="${b.unit === 'min' ? 15 : 1}" inputmode="numeric"></label>
-    <div class="field"><span>What triggered it?</span><div class="chips">${TRIGGERS.map(t => `<label class="chip"><input type="checkbox" name="trig" value="${esc(t)}">${esc(t)}</label>`).join('')}</div></div>
-    <label class="field"><span>Note (optional)</span><input name="note" id="slNote" maxlength="140" placeholder="Where were you, what were you avoiding?"></label>
-    <p class="tiny muted">No XP is lost. Honest logging is what makes the habit unsatisfying. One slip is a blip. Don’t let it become two.</p>
-    <button class="btn danger block">Log it</button>
+  const k = todayKey(), rec = day(k), opts = [];
+  if (rec.highlight && rec.highlight.text && !rec.highlight.done) opts.push(`Highlight: ${rec.highlight.text}`);
+  rec.planned.map(taskById).filter(t => t && !t.done).forEach(t => opts.push(t.title));
+  S.habits.filter(h => isScheduled(h, k) && !rec.habits[h.id]).forEach(h => opts.push(h.name));
+  const rate = `<div class="rate">${[1, 2, 3, 4, 5].map(n => `<label><input type="radio" name="urge" value="${n}">${n}</label>`).join('')}</div>`;
+  openSheet('Slip check-in', `<form class="stack" data-form="slip" style="gap:16px" novalidate>
+    <p class="small muted">No XP is lost. Being honest about why is how you find the cue and break it. One slip is a blip. Don’t let it become two.</p>
+    <div class="field"><span>What did you do?</span><div class="chips">${S.bad.map(x => `<label class="chip"><input type="radio" name="bad" value="${x.id}" ${x.id === b.id ? 'checked' : ''}>${esc(x.name)}</label>`).join('')}</div></div>
+    <label class="field"><span>How much? Minutes for time-based habits, otherwise how many times</span><input type="number" name="amount" id="slAmt" min="1" max="600" value="${b.unit === 'min' ? 15 : 1}" inputmode="numeric" style="max-width:140px"></label>
+    <div class="q" id="slWhy"><span class="ql">Why did you do it?</span><span class="tiny muted">Pick everything that’s true.</span>
+      <div class="chips">${REASONS.map(([r]) => `<label class="chip"><input type="checkbox" name="reason" value="${esc(r)}">${esc(r)}</label>`).join('')}</div>
+      <input name="other" id="slOther" maxlength="120" placeholder="Another reason, in your own words">
+      <span class="err" id="slErr" hidden>Pick at least one reason, or write your own. This is the part that helps.</span></div>
+    <div class="q"><span class="ql">How were you feeling just before?</span>
+      <div class="chips">${FEELINGS.map(f => `<label class="chip feel"><input type="checkbox" name="feel" value="${esc(f)}">${esc(f)}</label>`).join('')}</div></div>
+    <div class="row" style="gap:24px;align-items:flex-start">
+      <div class="q"><span class="ql">How strong was the urge?</span>${rate}</div>
+      <div class="q"><span class="ql">How do you feel now?</span><div class="chips">${AFTER.map(([v, l]) => `<label class="chip"><input type="radio" name="after" value="${v}">${l}</label>`).join('')}</div></div>
+    </div>
+    <label class="q"><span class="ql">What should you have been doing instead?</span><select name="instead" id="slInstead"><option value="">Nothing in particular</option>${opts.map(o => `<option>${esc(o)}</option>`).join('')}<option>Sleeping</option><option>Resting properly</option></select></label>
+    <label class="field"><span>Note (optional)</span><input name="note" id="slNote" maxlength="140" placeholder="Where were you? What happened just before?"></label>
+    <button class="btn danger block">Log it honestly</button>
   </form>`);
+}
+function mSlipAfter(b, slip) {
+  const k = todayKey(), rec = day(k), st = badStats(b);
+  const reasons = slipReasons(slip);
+  const next = S.habits.filter(h => isScheduled(h, k) && !rec.habits[h.id]).sort((x, y) => (toMin(x.time) ?? 9999) - (toMin(y.time) ?? 9999))[0];
+  const task = rec.highlight && rec.highlight.text && !rec.highlight.done ? rec.highlight.text : (rec.planned.map(taskById).find(t => t && !t.done) || {}).title;
+  const avoid = reasons.some(r => /planned task|Avoiding/.test(r));
+  openSheet('Logged. Now reset.', `
+    <div class="pastr">
+      <div><b>${esc(b.name)}</b> · ${amt(b, b.unit === 'min' ? slip.amount : st.today.a)} ${b.unit === 'min' ? 'today' : 'today in total'}${b.unit === 'min' && st.perYear >= 60 ? ` · about ${Math.round(st.perYear / 60)} hours a year at this rate` : ''}</div>
+      ${reasons.length ? `<div><b>Because:</b> ${reasons.map(esc).join(', ')}</div>` : ''}
+      ${(slip.feel || []).length ? `<div><b>Feeling:</b> ${slip.feel.map(esc).join(', ')}</div>` : ''}
+      ${slip.instead ? `<div><b>Instead of:</b> ${esc(slip.instead)}</div>` : ''}
+    </div>
+    ${reasons.length ? `<div class="fix"><b>Next move:</b> ${esc(fixFor(reasons[0]))}</div>` : ''}
+    ${quoteLine(pickQuote('slip' + slip.t, ['discipline', 'naruto', 'dbz', 'onepiece', 'demonslayer', 'ronaldo']))}
+    <div class="stack" style="gap:8px">
+      ${avoid && task ? `<button class="btn accent block" data-act="laser" data-min="10" data-label="${esc(task.replace(/^Highlight: /, ''))}">Do 10 minutes of “${esc(task.replace(/^Highlight: /, ''))}” now</button>` : ''}
+      ${next ? `<button class="btn leaf block" data-act="h-do" data-id="${next.id}" data-mode="min" data-close="1">Win it back: 2-min ${esc(next.name)} (${esc(lc(next.min))})</button>` : ''}
+      <button class="btn ghost block" data-act="close">Close</button>
+    </div>`);
 }
 function mTask(t) {
   const goals = S.goals.filter(g => !g.done || g.id === t.goalId).sort((a, b) => HZ.indexOf(a.horizon) - HZ.indexOf(b.horizon));
@@ -1687,7 +1817,7 @@ function mDay(k) {
       <div class="tile"><b>${Object.keys(r.habits).length}/${hs.length}</b><span>habits</span></div>
       <div class="tile"><b>${fmtMin(focusMin(r))}</b><span>focus</span></div></div>
     <div class="small"><b>Highlight:</b> ${r.highlight && r.highlight.text ? `${esc(r.highlight.text)} · ${r.highlight.done ? 'won' : 'not done'}` : '—'}</div>
-    ${(r.slips || []).length ? `<div class="small"><b>Slips:</b> ${r.slips.map(x => { const b = badById(x.badId); return b ? `${esc(b.name)} ${amt(b, b.unit === 'min' ? +x.amount : 1)}` : ''; }).filter(Boolean).join(', ')}</div>` : ''}
+    ${(r.slips || []).filter(x => !x.dup).length ? `<div class="stack small" style="gap:6px">${r.slips.filter(x => !x.dup).map(x => { const b = badById(x.badId); if (!b) return ''; const rs = slipReasons(x); return `<div class="pastr"><div><b>${esc(b.name)}</b> ${b.unit === 'min' ? fmtMin(+x.amount || 0) : ''} · ${new Date(x.t).toTimeString().slice(0, 5)}</div>${rs.length ? `<div>Because: ${rs.map(esc).join(', ')}</div>` : ''}${(x.feel || []).length ? `<div>Feeling: ${x.feel.map(esc).join(', ')}${x.after ? ` · afterwards: ${esc((AFTER.find(a => a[0] === x.after) || [])[1] || '')}` : ''}</div>` : ''}</div>`; }).join('')}</div>` : ''}
     ${r.reflection ? `<div class="pastr">${r.reflection.win ? `<div><b>Win:</b> ${esc(r.reflection.win)}</div>` : ''}${r.reflection.adjust ? `<div><b>Adjust:</b> ${esc(r.reflection.adjust)}</div>` : ''}${r.reflection.grateful ? `<div><b>Grateful:</b> ${esc(r.reflection.grateful)}</div>` : ''}</div>` : ''}
     ${r.log.length ? `<div class="stack small" style="gap:4px">${r.log.slice().sort((a, b) => a.t - b.t).map(e => `<div class="row between"><span>${esc(e.label)}</span><span class="mono muted">+${e.xp}</span></div>`).join('')}</div>` : ''}`);
 }
@@ -1891,12 +2021,14 @@ const ACT = {
   },
   'h-do': a => {
     const h = habitById(a.dataset.id); if (!h) return;
+    const rect = a.getBoundingClientRect();
+    if (a.dataset.close) closeSheet();
     const rec = day(), mode = a.dataset.mode; if (rec.habits[h.id]) return;
     const prior = habitStreak(h);
     rec.habits[h.id] = mode;
     const id = identityText(h.identity);
     const msg = prior.state === 'risk' ? `Back on track. You never miss twice.` : id ? `Vote cast: ${id}` : `+${xpOf(h, mode)} XP`;
-    award('habit', h.id, `${h.name} (${mode === 'full' ? 'full' : '2-min'})`, xpOf(h, mode), a.getBoundingClientRect(), msg);
+    award('habit', h.id, `${h.name} (${mode === 'full' ? 'full' : '2-min'})`, xpOf(h, mode), rect, msg);
     render();
   },
   'h-undo': a => { const rec = day(); delete rec.habits[a.dataset.id]; revoke('habit', a.dataset.id); render(); },
@@ -2041,13 +2173,15 @@ const FORMS = {
   },
   slip: f => {
     const id = (f.querySelector('input[name=bad]:checked') || {}).value, b = badById(id); if (!b) return;
+    const reasons = $$('input[name=reason]:checked', f).map(i => i.value), other = f.elements.other.value.trim();
+    if (!reasons.length && !other) { const e = $('#slErr'); e.hidden = false; $('#slWhy').scrollIntoView({ block: 'center', behavior: rm() ? 'auto' : 'smooth' }); return; }
     const amount = clamp(Math.round(+f.elements.amount.value || 1), 1, 600);
+    const pick = n => (f.querySelector(`input[name=${n}]:checked`) || {}).value || null;
     const rec = day();
-    rec.slips.push({ badId: b.id, t: Date.now(), amount: b.unit === 'min' ? amount : 1, trig: $$('input[name=trig]:checked', f).map(i => i.value), note: f.elements.note.value.trim() });
-    if (b.unit !== 'min' && amount > 1) for (let i = 1; i < amount; i++) rec.slips.push({ badId: b.id, t: Date.now(), amount: 1, trig: [], note: '' });
-    save(); closeSheet(); render();
-    const st = badStats(b);
-    toast(b.unit === 'min' ? `Logged. ${fmtMin(st.week.a)} this week${st.perYear >= 60 ? `, about ${Math.round(st.perYear / 60)} hours a year at this rate` : ''}. Don’t miss twice.` : `Logged. ${st.week.a}× this week. Make the next one difficult.`, 4200);
+    const slip = { badId: b.id, t: Date.now(), amount: b.unit === 'min' ? amount : 1, reasons, other, feel: $$('input[name=feel]:checked', f).map(i => i.value), urge: +pick('urge') || null, after: pick('after'), instead: f.elements.instead.value, note: f.elements.note.value.trim() };
+    rec.slips.push(slip);
+    if (b.unit !== 'min' && amount > 1) for (let i = 1; i < amount; i++) rec.slips.push({ badId: b.id, t: slip.t, amount: 1, dup: true });
+    save(); render(); mSlipAfter(b, slip);
   },
   block: f => {
     const e = f.elements, rec = day();
@@ -2086,6 +2220,13 @@ const FORMS = {
       if (ys !== null && sc > ys) setTimeout(() => award('beat', 'beat', `Better than yesterday (${sc} vs ${ys})`, XP.beat, null, `Better than yesterday: ${sc} vs ${ys}. +${XP.beat} bonus XP`), 900);
     } else toast('Reflection updated');
     go('today');
+  },
+  pin: f => {
+    const v = +((f.querySelector('input[name=pin]:checked') || {}).value ?? 0), text = f.elements.pinText.value.trim();
+    const typedNew = text && text !== S.settings.pinText;
+    S.settings.pinText = text; S.settings.pinBy = f.elements.pinBy.value.trim();
+    S.settings.pin = typedNew || (v === -1 && text) ? -1 : v === -1 ? 0 : v;
+    save(); render(); toast('Pinned to Today');
   },
   quotes: f => {
     S.quotes = f.elements.mine.value.split('\n').map(l => l.trim()).filter(Boolean).map(l => {
@@ -2230,6 +2371,7 @@ setInterval(() => {
 /* =========================================================
    Boot
    ========================================================= */
+try { new ResizeObserver(() => document.documentElement.style.setProperty('--hdr', $('.top').offsetHeight + 'px')).observe($('.top')); } catch (e) {}
 S = load();
 lastKey = todayKey();
 applyTheme();
