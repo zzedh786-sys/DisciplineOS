@@ -827,7 +827,7 @@ function saveNow() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); }
   catch (e) { if (!storageWarned) { storageWarned = true; toast('This browser is blocking storage. Export your data in Settings to keep it.'); } }
 }
-function save() { clearTimeout(saveT); saveT = setTimeout(saveNow, 150); }
+function save() { S.habits.forEach(fillLaws); clearTimeout(saveT); saveT = setTimeout(saveNow, 150); }
 
 /* =========================================================
    Domain helpers
@@ -850,6 +850,64 @@ const isScheduled = (h, k) => k >= (h.since || S.created) && (h.days || ALL_DAYS
 const focusMin = rec => rec ? (rec.focus || []).reduce((a, f) => a + (+f.min || 0), 0) : 0;
 const lostMin = rec => rec ? (rec.slips || []).reduce((a, s) => a + ((badById(s.badId) || {}).unit === 'min' ? (+s.amount || 0) : 0), 0) : 0;
 const amt = (b, n) => b.unit === 'min' ? fmtMin(n) : `${n}×`;
+
+/* Four laws written from the habit itself whenever the user leaves one blank. Each kind of habit gets its own advice,
+   with the cue, place, time, 2-minute version and identity worked in. Generated laws are marked in lawsAuto and
+   rewritten when the habit changes; anything the user typed is kept as it is. */
+const LAW_KEYS = ['obvious', 'attractive', 'easy', 'satisfying'];
+const LAW_KINDS = [
+  ['sleep', /sleep|\bbed\b|bedtime|wind[- ]?down|lights out|\bnap\b/],
+  ['screen', /\b(no|without|off|away|out of)\b.*\b(phone|screen|social|scroll)|\b(phone|screen)s?[- ](free|off|away|out)|offline|airplane/],
+  ['care', /floss|teeth|tooth|skincare|skin ?care|moisturi|sunscreen|\bspf\b|shower|retainer|shave/],
+  ['light', /daylight|sunlight|\bsun\b|outside|fresh air/],
+  ['move', /gym|\brun|jog|train|work ?out|exercise|yoga|pilates|walk|stretch|press[- ]?ups?|push[- ]?ups?|squat|lift|swim|cycl|bike|\bsteps\b|sport|football|hiit|cardio|mobility/],
+  ['mind', /meditat|pray|gratitude|breath|mindful|stillness|journal|quran|bible|dhikr/],
+  ['study', /stud|revis|exam|akt|mrcgp|question|quiz|learn|course|flashcard|anki|lecture|portfolio|cpd|\bread|book|chapter|\bpages?\b|guideline|podcast/],
+  ['create', /write|script|film|edit|video|content|tiktok|reel|youtube|blog|draw|paint|music|guitar|piano|practi[cs]e|design|\bpost/],
+  ['water', /water|hydrat|\bdrink\b(?!.*(alcohol|beer|wine))/],
+  ['fuel', /cook|meal|prep|lunch|breakfast|dinner|\beat|fruit|\bveg|protein|snack|vitamin|supplement/],
+  ['tidy', /clean|tidy|laundry|dishes|wash up|hoover|vacuum|declutter|make (my|the) bed/],
+  ['money', /money|budget|spend|saving|invest|bank|bills|pension|finance/],
+  ['social', /\bcall\b|\bring\b|message|\btext\b|friend|family|\bmum\b|\bdad\b|partner|parents/],
+];
+const capFirst = s => { s = String(s || ''); return s.charAt(0).toUpperCase() + s.slice(1); };
+function lawKind(h) {
+  const t = `${h.name || ''} ${h.full || ''} ${h.min || ''}`.toLowerCase();
+  const hit = LAW_KINDS.find(([, re]) => re.test(t));
+  return hit ? hit[0] : ({ sleep: 'sleep', move: 'move', food: 'fuel', light: 'light' }[h.energy] || 'any');
+}
+const CUE_FOR = { move: 'after you get dressed', study: 'after you pour your first coffee', create: 'after dinner, before you open any app', mind: 'as soon as you wake up', sleep: 'when your wind-down alarm goes off', light: 'as soon as you get out of bed', water: 'every time you sit down at a desk', fuel: 'after dinner, for tomorrow', screen: 'as soon as you get home', tidy: 'after dinner', money: 'on Sunday evening', social: 'on your walk or drive home', care: 'after you brush your teeth', any: 'straight after something you already do every day' };
+function autoLaws(h) {
+  const kind = lawKind(h), name = lc(h.name || 'it'), at = h.loc ? ` (${h.loc})` : '', tiny = h.min ? lc(h.min) : '';
+  const idt = h.identity && S ? identityText(h.identity) : '';
+  const vote = idt ? `a vote for “${idt.replace(/\.$/, '')}”` : 'a vote for who you’re becoming';
+  const two = (fallback, extra = '') => `Two minutes counts: ${tiny || fallback}.${extra ? ' ' + extra : ''}`;
+  const T = {
+    move: ['Lay your kit out the night before' + at + '.', 'Save your favourite playlist or podcast for training only.', two('put your trainers on and do 10 squats', 'Pick a workout you can start at home.'), `Log it straight after and notice your energy. Every session is ${vote}.`],
+    study: ['Leave the book, app or notes open where you sit' + at + '.', 'Pair it with a coffee or drink you like, only while you study.', tiny ? `Start tiny: ${tiny}. Close every other tab first.` : 'Start tiny: one question, one page or one flashcard. Close every other tab first.', `Track your score or pages and watch them climb. Each session is ${vote}.`],
+    create: ['Keep an ideas note on your home screen and your kit ready' + at + '.', 'Think of the people it will help or make laugh. Let the first draft be rough.', two('write one hook or one line', 'Don’t edit while you create.'), `Count what you ship each month, not what you planned. Each one is ${vote}.`],
+    mind: ['Pick one spot for it' + at + ' and leave what you need there.', 'Do it with a warm drink in a quiet moment you enjoy.', tiny ? `${capFirst(tiny)} is enough on hard days.` : 'One slow breath or one line is enough on hard days.', `Notice how much calmer the next hour feels, then tick it off. It’s ${vote}.`],
+    sleep: [`Set a wind-down alarm${h.time ? ` for ${h.time}` : ''} so the alarm is the cue${at}.`, 'Make the room inviting: dim lights, a cool room, a book you’re enjoying.', tiny ? two('', 'Charge your phone outside the bedroom.') : 'Charge your phone outside the bedroom so the easy option is sleep.', `Log your hours slept each morning and watch your energy rise. It’s ${vote}.`],
+    light: ['Open the curtains straight away and leave your shoes by the door' + at + '.', 'Take a coffee or a podcast outside with you.', two('step outside the front door'), `Notice how much more awake the first hour feels. It’s ${vote}.`],
+    water: ['Keep a full bottle in sight' + at + ', on your desk or in your bag.', 'Use a bottle you like and add ice, lemon or fruit.', two('drink one full glass now', 'Refill it every time it’s empty.'), `Mark each bottle and notice fewer afternoon headaches. It’s ${vote}.`],
+    care: ['Leave it next to your toothbrush or by the sink' + at + ' where you can’t miss it.', 'Make it feel like a reset: good lighting, a product you like using.', two('just one tooth or one step', 'One is better than none.'), `Tick it off and notice the difference at your next check-up. It’s ${vote}.`],
+    fuel: ['Put the food at eye level in the fridge and lay out what you need' + at + ' the night before.', 'Make it something you look forward to, with flavours you like.', tiny ? `Prep the night before so it’s grab-and-go: ${tiny}.` : 'Prep the night before so it’s grab-and-go.', `Tick it off and notice skipping the afternoon crash. It’s ${vote}.`],
+    screen: ['Put the phone somewhere you can’t see it' + at + ' before the cue hits.', 'Fill the slot with something better: music, a book, a walk.', tiny ? two('', 'Use a normal alarm clock.') : 'Charge it in another room and use a normal alarm clock.', `Check your screen time and count the minutes you won back. It’s ${vote}.`],
+    tidy: ['Keep the supplies where the mess happens' + at + '.', 'Put on one song or a podcast and race it.', two('clear one surface'), `Enjoy walking into a clear room, then tick it off. It’s ${vote}.`],
+    money: ['Put the banking app on your home screen where a social app used to be.', 'Name your savings pot after the thing you’re saving for.', two('open the app and check the balance', 'Automate what you can.'), `Watch the balance or savings pot grow. It’s ${vote}.`],
+    social: [`Set a reminder${h.time ? ` for ${h.time}` : ''} with their name on it.`, 'Do it on a walk or over a coffee.', two('send one message'), `Notice how much better you both feel, then tick it off. It’s ${vote}.`],
+    any: ['Leave whatever you need for it out where you’ll see it' + at + '.', 'Pair it with something you enjoy, like music or a good coffee, only while you do it.', tiny ? `Start with the 2-minute version: ${tiny}. Get everything ready beforehand.` : 'Make the first step so small it takes under two minutes. Get everything ready beforehand.', `Tick it off here straight away and watch the streak grow. Each one is ${vote}.`],
+  }[kind];
+  const when = h.time && !T[0].includes(h.time) ? `, around ${h.time}` : '';
+  const cue = h.cue ? `Stack it on your cue: ${lc(h.cue)}, ${name}.` : `Give it a cue: do it ${CUE_FOR[kind]}${when}.`;
+  return { obvious: `${cue} ${T[0]}`, attractive: T[1], easy: T[2], satisfying: T[3] };
+}
+function fillLaws(h) {
+  h.laws = h.laws || {}; h.lawsAuto = h.lawsAuto || {};
+  let g = null;
+  for (const k of LAW_KEYS) if (!h.laws[k] || h.lawsAuto[k]) { g = g || autoLaws(h); h.laws[k] = g[k]; h.lawsAuto[k] = true; }
+}
+const minText = h => h.min ? lc(h.min) : `two minutes of ${lc(h.name)}`;
 
 /* Never miss twice: a single miss holds the streak, the next completion continues it, two misses in a row reset it. */
 function habitStreak(h) {
@@ -1228,7 +1286,7 @@ function habitRow(h, rec, k, opts = {}) {
     <span class="ring" aria-hidden="true">${I.check}</span>
     <div style="min-width:0">
       <div class="hn">${esc(h.name)}</div>
-      ${h.cue ? `<div class="hcue">${esc(h.cue)}, I will <b>${esc(lc(h.full))}</b></div>` : `<div class="hcue">${esc(h.full)}</div>`}
+      ${h.cue ? `<div class="hcue">${esc(h.cue)}, I will <b>${esc(lc(h.full || h.name))}</b></div>` : h.full ? `<div class="hcue">${esc(h.full)}</div>` : ''}
       <div class="hmeta">
         ${where ? `<span>${esc(where)}</span>` : ''}
         <span class="st">${s.streak}-day streak</span>${s.best > s.streak ? `<span>best ${s.best}</span>` : ''}
@@ -1239,7 +1297,7 @@ function habitRow(h, rec, k, opts = {}) {
     </div>
     <div class="hacts">${!today ? '' : mode
       ? `<span class="done-l">${mode === 'full' ? 'Full' : '2-min'} +${xpOf(h, mode)}</span><button class="link" data-act="h-undo" data-id="${h.id}">undo</button>`
-      : `<button class="btn" data-act="h-do" data-id="${h.id}" data-mode="full" title="${esc(h.full)}">Full +${xpOf(h, 'full')}</button><button class="btn ghost" data-act="h-do" data-id="${h.id}" data-mode="min" title="${esc(h.min)}">2-min +${minXp(h)}</button>`}</div>
+      : `<button class="btn" data-act="h-do" data-id="${h.id}" data-mode="full" title="${esc(h.full || h.name)}">Full +${xpOf(h, 'full')}</button><button class="btn ghost" data-act="h-do" data-id="${h.id}" data-mode="min" title="${esc(capFirst(minText(h)))}">2-min +${minXp(h)}</button>`}</div>
   </div>`;
 }
 const lc = s => { s = String(s || ''); return s.charAt(0).toLowerCase() + s.slice(1); };
@@ -1363,14 +1421,14 @@ function dotStrip(h, k) {
   return `<div class="dots" aria-label="Last 14 days">${out}</div>`;
 }
 function habitCard(h, rec, k) {
-  const sched = isScheduled(h, k), L = h.laws || {};
+  const sched = isScheduled(h, k), L = h.laws || {}, auto = LAW_KEYS.some(x => (h.lawsAuto || {})[x]);
   const laws = [['Obvious', L.obvious], ['Attractive', L.attractive], ['Easy', L.easy], ['Satisfying', L.satisfying]].filter(x => x[1]);
   const daysTxt = (h.days || ALL_DAYS).length === 7 ? 'Every day' : (h.days || []).slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(d => DOW[d]).join(' ');
   return `<div class="hcard">
     ${habitRow(h, rec, k, { unsched: !sched })}
-    <dl class="vers"><dt>Full</dt><dd>${esc(h.full)}</dd><dt>2-min</dt><dd>${esc(h.min)}</dd>${h.identity ? `<dt>Votes for</dt><dd>${esc(identityText(h.identity))}</dd>` : ''}<dt>When</dt><dd>${esc(daysTxt)}${h.energy ? `, energizes ${ENERGY[h.energy].toLowerCase()}` : ''}</dd></dl>
+    <dl class="vers">${h.full ? `<dt>Full</dt><dd>${esc(h.full)}</dd>` : ''}<dt>2-min</dt><dd>${h.min ? esc(h.min) : `<span class="muted">Any two minutes of it counts</span>`}</dd>${h.identity ? `<dt>Votes for</dt><dd>${esc(identityText(h.identity))}</dd>` : ''}<dt>When</dt><dd>${esc(daysTxt)}${h.energy ? `, energizes ${ENERGY[h.energy].toLowerCase()}` : ''}</dd></dl>
     ${dotStrip(h, k)}
-    <div class="row between">${laws.length ? `<details><summary>The four laws</summary><dl class="laws">${laws.map(([a, b]) => `<dt>${a}</dt><dd>${esc(b)}</dd>`).join('')}</dl></details>` : '<span></span>'}<button class="btn ghost sm" data-act="h-edit" data-id="${h.id}">Edit</button></div>
+    <div class="row between">${laws.length ? `<details><summary>The four laws</summary><dl class="laws">${laws.map(([a, b]) => `<dt>${a}</dt><dd>${esc(b)}</dd>`).join('')}</dl>${auto ? `<p class="note" style="margin-top:8px">Written for you from this habit. Edit the habit to make them your own.</p>` : ''}</details>` : '<span></span>'}<button class="btn ghost sm" data-act="h-edit" data-id="${h.id}">Edit</button></div>
   </div>`;
 }
 function badView() {
@@ -1721,23 +1779,21 @@ function closeSheet() { $('#modal').hidden = true; $('#sheet').innerHTML = ''; u
 function mHabit(h, routine) {
   const isNew = !h;
   h = h || { id: '', routine: routine || 'am', name: '', full: '', min: '', cue: '', time: '', loc: '', identity: '', energy: '', xp: 20, days: ALL_DAYS.slice(), laws: {} };
-  const L = h.laws || {};
+  const L = h.laws || {}, gen = autoLaws(h);
   openSheet(isNew ? 'New habit' : 'Edit habit', `<form class="stack" data-form="habit" data-id="${h.id}">
     <label class="field"><span>Name</span><input name="name" id="mhName" required maxlength="40" value="${esc(h.name)}" placeholder="e.g. Stretch"></label>
     <div class="row"><label class="field grow"><span>Routine</span><select name="routine" id="mhRoutine">${[['am', 'Morning'], ['pm', 'Evening'], ['any', 'Anytime']].map(([v, l]) => `<option value="${v}" ${h.routine === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       <label class="field" style="flex:0 1 110px"><span>Full XP</span><input type="number" name="xp" id="mhXp" min="5" max="100" value="${h.xp}"></label></div>
-    <label class="field"><span>Full version</span><input name="full" id="mhFull" required maxlength="120" value="${esc(h.full)}" placeholder="30 minutes of yoga"></label>
-    <label class="field"><span>2-minute version (keeps the streak, earns less XP)</span><input name="min" id="mhMin" required maxlength="120" value="${esc(h.min)}" placeholder="Roll out the mat"></label>
+    <label class="field"><span>Full version (optional)</span><input name="full" id="mhFull" maxlength="120" value="${esc(h.full)}" placeholder="e.g. 30 minutes of yoga"></label>
+    <label class="field"><span>2-minute version (optional, keeps the streak and earns less XP)</span><input name="min" id="mhMin" maxlength="120" value="${esc(h.min)}" placeholder="e.g. Roll out the mat"></label>
     <label class="field"><span>Habit stack: after I…</span><input name="cue" id="mhCue" maxlength="80" value="${esc(h.cue)}" placeholder="After I pour my coffee"></label>
     <div class="row"><label class="field grow"><span>Time</span><input name="time" id="mhTime" maxlength="20" value="${esc(h.time)}" placeholder="07:00"></label><label class="field grow"><span>Location</span><input name="loc" id="mhLoc" maxlength="40" value="${esc(h.loc)}" placeholder="Kitchen table"></label></div>
     <div class="field"><span>Days</span><div class="chips">${[1, 2, 3, 4, 5, 6, 0].map(d => `<label class="chip"><input type="checkbox" name="days" value="${d}" ${(h.days || ALL_DAYS).includes(d) ? 'checked' : ''}>${DOW[d]}</label>`).join('')}</div></div>
     <div class="row"><label class="field grow"><span>Votes for</span><select name="identity" id="mhId"><option value="">No identity</option>${S.identities.map(i => `<option value="${i.id}" ${h.identity === i.id ? 'selected' : ''}>${esc(i.text)}</option>`).join('')}</select></label>
       <label class="field" style="flex:0 1 150px"><span>Energize</span><select name="energy" id="mhEn"><option value="">None</option>${Object.entries(ENERGY).map(([v, l]) => `<option value="${v}" ${h.energy === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label></div>
     <details><summary>The four laws (optional)</summary><div class="stack" style="padding-top:8px">
-      <label class="field"><span>Make it obvious</span><input name="obvious" id="mhL1" value="${esc(L.obvious || '')}" placeholder="Kit laid out the night before"></label>
-      <label class="field"><span>Make it attractive</span><input name="attractive" id="mhL2" value="${esc(L.attractive || '')}" placeholder="Favourite playlist only while training"></label>
-      <label class="field"><span>Make it easy</span><input name="easy" id="mhL3" value="${esc(L.easy || '')}" placeholder="Gym on the way home"></label>
-      <label class="field"><span>Make it satisfying</span><input name="satisfying" id="mhL4" value="${esc(L.satisfying || '')}" placeholder="Tick it off and watch the streak"></label>
+      <p class="note">Leave any of these blank and they’re written for you from this habit. The grey text shows what you’ll get.</p>
+      ${LAW_KEYS.map((k, i) => `<label class="field"><span>Make it ${k}</span><input name="${k}" id="mhL${i + 1}" maxlength="160" value="${esc((h.lawsAuto || {})[k] ? '' : (L[k] || ''))}" placeholder="${esc(gen[k])}"></label>`).join('')}
     </div></details>
     <div class="row"><button class="btn">Save habit</button>${isNew ? '' : `<button type="button" class="btn danger" data-act="h-del" data-id="${h.id}">${ui.confirm === 'h-' + h.id ? 'Tap again to delete' : 'Delete'}</button>`}</div>
   </form>`);
@@ -1798,7 +1854,7 @@ function mSlipAfter(b, slip) {
     ${quoteLine(pickQuote('slip' + slip.t, ['discipline', 'naruto', 'dbz', 'onepiece', 'demonslayer', 'ronaldo']))}
     <div class="stack" style="gap:8px">
       ${avoid && task ? `<button class="btn accent block" data-act="laser" data-min="10" data-label="${esc(task.replace(/^Highlight: /, ''))}">Do 10 minutes of “${esc(task.replace(/^Highlight: /, ''))}” now</button>` : ''}
-      ${next ? `<button class="btn leaf block" data-act="h-do" data-id="${next.id}" data-mode="min" data-close="1">Win it back: 2-min ${esc(next.name)} (${esc(lc(next.min))})</button>` : ''}
+      ${next ? `<button class="btn leaf block" data-act="h-do" data-id="${next.id}" data-mode="min" data-close="1">Win it back: 2-min ${esc(next.name)} (${esc(minText(next))})</button>` : ''}
       <button class="btn ghost block" data-act="close">Close</button>
     </div>`);
 }
@@ -1923,7 +1979,7 @@ function urgeOpen() {
   urgeEnd = Date.now() + 90000;
   const rec = day(), k = todayKey();
   const next = S.habits.filter(h => isScheduled(h, k) && !rec.habits[h.id]).sort((a, b) => (toMin(a.time) ?? 9999) - (toMin(b.time) ?? 9999))[0];
-  const swap = next ? `Instead, do the 2-minute version of <b>${esc(next.name)}</b>: ${esc(lc(next.min))}.` : 'Instead: stand up, drink a glass of water, and step outside for two minutes.';
+  const swap = next ? `Instead, do the 2-minute version of <b>${esc(next.name)}</b>: ${esc(minText(next))}.` : 'Instead: stand up, drink a glass of water, and step outside for two minutes.';
   $('#urge').innerHTML = `<div class="eyebrow">Urge surfing, 90 seconds</div>
     <div class="breath"><i></i><b id="urgeT">1:30</b><small id="urgeB">breathe in</small></div>
     <div class="lbl">${esc(identityOfDay(k))}</div>
@@ -2203,11 +2259,14 @@ const FORMS = {
   habit: f => {
     const e = f.elements, id = f.dataset.id;
     const days = $$('input[name=days]:checked', f).map(i => +i.value);
-    const data = { name: e.name.value.trim(), routine: e.routine.value, xp: clamp(+e.xp.value || 20, 5, 100), full: e.full.value.trim(), min: e.min.value.trim(), cue: e.cue.value.trim(), time: e.time.value.trim(), loc: e.loc.value.trim(), identity: e.identity.value, energy: e.energy.value, days: days.length ? days : ALL_DAYS.slice(), laws: { obvious: e.obvious.value.trim(), attractive: e.attractive.value.trim(), easy: e.easy.value.trim(), satisfying: e.satisfying.value.trim() } };
+    const data = { name: e.name.value.trim(), routine: e.routine.value, xp: clamp(+e.xp.value || 20, 5, 100), full: e.full.value.trim(), min: e.min.value.trim(), cue: e.cue.value.trim(), time: e.time.value.trim(), loc: e.loc.value.trim(), identity: e.identity.value, energy: e.energy.value, days: days.length ? days : ALL_DAYS.slice(), laws: {}, lawsAuto: {} };
+    for (const k of LAW_KEYS) { data.laws[k] = e[k].value.trim(); data.lawsAuto[k] = !data.laws[k]; }
     if (!data.name) return;
     const h = id && habitById(id);
+    const auto = LAW_KEYS.filter(k => data.lawsAuto[k]).length;
     if (h) Object.assign(h, data); else S.habits.push(Object.assign({ id: 'h-' + uid(), since: todayKey() }, data));
-    save(); closeSheet(); ui.htab = data.routine; render(); toast(h ? 'Habit saved' : 'Habit added. Make it obvious, attractive, easy, satisfying.');
+    save(); closeSheet(); ui.htab = data.routine; render();
+    toast(`${h ? 'Habit saved' : 'Habit added'}.${auto ? ` ${auto === 4 ? 'All four laws' : plural(auto, 'law')} written for you. Open “The four laws” on the card to read them.` : ''}`, auto ? 3600 : 2400);
   },
   bad: f => {
     const e = f.elements, id = f.dataset.id;
@@ -2376,6 +2435,11 @@ document.addEventListener('submit', e => {
   e.preventDefault();
   const fn = FORMS[f.dataset.form]; if (fn) fn(f);
 });
+document.addEventListener('input', e => {
+  const f = e.target.closest('form[data-form=habit]'); if (!f || LAW_KEYS.includes(e.target.name)) return;
+  const el = f.elements, g = autoLaws({ name: el.name.value.trim(), full: el.full.value.trim(), min: el.min.value.trim(), cue: el.cue.value.trim(), time: el.time.value.trim(), loc: el.loc.value.trim(), identity: el.identity.value, energy: el.energy.value });
+  for (const k of LAW_KEYS) el[k].placeholder = g[k];
+});
 document.addEventListener('change', e => {
   const t = e.target;
   if (t.dataset.bind === 'sleep') { const rec = day(); rec.sleep = t.value === '' ? null : clamp(+t.value, 0, 16); save(); render(); }
@@ -2419,6 +2483,7 @@ setInterval(() => {
    ========================================================= */
 try { new ResizeObserver(() => document.documentElement.style.setProperty('--hdr', $('.top').offsetHeight + 'px')).observe($('.top')); } catch (e) {}
 S = load();
+S.habits.forEach(fillLaws);
 lastKey = todayKey();
 applyTheme();
 const startView = location.hash.slice(1);
