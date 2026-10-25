@@ -24,7 +24,7 @@ Body text is Atkinson Hyperlegible, chosen to be easy to read when you're tired.
 | **Goals** | Daily, weekly, monthly, quarterly and yearly goals. Each one can have a numeric target, support a bigger goal (year → quarter → month → week → day), and vote for an identity. Unfinished goals can be carried over into the next period. |
 | **Progress** | Week view: daily score chart against your average, habit grid, slips grid, focus time, time lost, XP, and arrows against last week. Month view: score heatmap calendar, habit completion rates, and the 1% compounding counter. |
 | **Pinned line** | A not-average quote pinned under the header on Today, visible while you scroll. Pick one or write your own in Settings. |
-| **Quotes** | A quote card on Today (one per day, tap **Another** for more), plus a quote in Laser focus, the urge-surf screen and every level-up. The built-in quotes cover motivation, discipline, Naruto, Dragon Ball Z, One Piece, Demon Slayer and Cristiano Ronaldo. Choose the categories and add your own (`quote — who said it`) in Settings. |
+| **Quotes** | A quote card on Today (one per day, tap **Another** for more), plus a quote in Laser focus, the urge-surf screen and every level-up. The built-in quotes cover motivation, discipline, time, Naruto, Dragon Ball Z, One Piece, Demon Slayer and Cristiano Ronaldo. A time quote also sits under Today's plan, and focus sessions and slips that came from avoiding a task lean on the time quotes. Choose the categories and add your own (`quote — who said it`) in Settings. |
 | **Reflect** | Evening reflection: energy and focus ratings, what went well, what got in the way, one adjustment, tomorrow's Highlight (waiting for you in the morning), gratitude. |
 
 ## The rules it runs on
