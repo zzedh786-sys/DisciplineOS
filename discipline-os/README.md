@@ -6,7 +6,7 @@ It is a separate app from Triage OS in the repo root. It uses its own code, desi
 
 ## Run it
 
-One self-contained file. Open `discipline-os/index.html` in any browser, or host the folder anywhere static (GitHub Pages works: `/discipline-os/`). Everything is stored in your browser only, so use **Settings → Back up and restore** now and then.
+Live at **https://zzedh786-sys.github.io/DisciplineOS/discipline-os/** (GitHub Pages, served from the repository's default branch). It's one self-contained file, so you can also open `discipline-os/index.html` in any browser or host the folder anywhere static. Everything is stored in your browser only, so use **Settings → Back up and restore** now and then.
 
 ## Design
 
