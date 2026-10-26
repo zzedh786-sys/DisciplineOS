@@ -837,7 +837,7 @@ function load() {
 let saveT = 0, storageWarned = false;
 function saveNow() {
   clearTimeout(saveT);
-  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  try { localStorage.setItem(KEY, JSON.stringify(S)); syncSchedule(); }
   catch (e) { if (!storageWarned) { storageWarned = true; toast('This browser is blocking storage. Export your data in Settings to keep it.'); } }
 }
 function save() { S.habits.forEach(fillLaws); clearTimeout(saveT); saveT = setTimeout(saveNow, 150); }
@@ -1729,7 +1729,8 @@ function vReflect() {
 function vPrefs() {
   const st = S.settings;
   const seg = (key, opts) => `<div class="seg" style="max-width:360px">${opts.map(([v, l]) => `<button class="${String(st[key]) === String(v) ? 'on' : ''}" data-act="set" data-k="${key}" data-v="${v}">${l}</button>`).join('')}</div>`;
-  return `<section class="card">
+  return `${syncCard()}
+    <section class="card">
       <div class="ch"><h2>Identity statements</h2></div>
       <p class="small muted">Write who you are becoming, starting with “I am someone who…”. Habits and goals vote for these.</p>
       <form class="stack" data-form="ids" style="gap:8px">
@@ -2035,7 +2036,8 @@ function onboard() {
     <h1>Not average.<br><em>Better than yesterday.</em></h1>
     <p>This is where you track your routines, habits, goals, tasks and focus, and see every day whether you are moving forward. It runs on two ideas: Atomic Habits (every habit is a vote for who you are becoming) and Make Time (one Highlight a day, protected with focus).</p>
     <label class="field"><span>What should we call you? (optional)</span><input id="obName" maxlength="30" value="${esc(S.name)}" placeholder="First name"></label>
-    <button class="btn accent block" data-act="ob-next">Start</button>`;
+    <button class="btn accent block" data-act="ob-next">Start</button>
+    <p class="note" style="text-align:center">Already use Discipline OS on another device? <button class="link" data-act="sync-in">Sign in with Google</button> to bring your data here.</p>`;
   if (st === 1) body = `<div class="eyebrow">Step 1 of 3</div>
     <h1>Who are you becoming?</h1>
     <p>Write identity statements, one per line, starting with “I am someone who…”. Every habit you complete is a vote for one of them. Edit these examples or replace them.</p>
@@ -2494,6 +2496,236 @@ setInterval(() => {
 }, 60000);
 
 /* =========================================================
+   Sync across devices: Google sign-in (Firebase Auth) and Firestore.
+   Data lives at users/{uid}/data/{id}: "meta" holds everything except the daily records, and "m-YYYY-MM" holds
+   one month of days, so each document stays small and a change uploads only what changed. Each document stores
+   { json, t, dev }. The cache remembers the last JSON synced per document, which tells local edits from remote
+   ones; when both sides changed the same document, the newer write wins. The SDK loads only when sync is used,
+   so the app stays light and works offline.
+   ========================================================= */
+const FB_CONFIG = {
+  apiKey: 'AIzaSyCzB1RMCS0dH0vP7YtTKBlyHOzzU1kJA1I',
+  authDomain: 'discipline-os-e5d32.firebaseapp.com',
+  projectId: 'discipline-os-e5d32',
+  storageBucket: 'discipline-os-e5d32.firebasestorage.app',
+  messagingSenderId: '55874971997',
+  appId: '1:55874971997:web:cfce5895f27641ccce20b4',
+};
+const FB_V = '10.12.2';
+const SITE_URL = 'https://zzedh786-sys.github.io/DisciplineOS/discipline-os/';
+const SYNC_KEY = 'disciplineos.sync';
+function syncMeta() { try { return JSON.parse(localStorage.getItem(SYNC_KEY) || '{}') || {}; } catch (e) { return {}; } }
+const sync = { status: 'off', user: null, db: null, ref: null, unsub: null, cache: {}, uid: null, last: 0, localT: 0, timer: 0, applying: false, err: '', loading: null, wanted: false, pending: null, renderLater: false };
+(() => { const m = syncMeta(); sync.dev = m.dev || uid(); sync.wanted = !!m.on; if (m.uid) { sync.uid = m.uid; sync.cache = m.cache || {}; sync.last = m.last || 0; sync.localT = m.localT || 0; } })();
+function syncSaveMeta() {
+  try { localStorage.setItem(SYNC_KEY, JSON.stringify({ on: sync.wanted, uid: sync.uid, cache: sync.cache, last: sync.last, localT: sync.localT, dev: sync.dev })); } catch (e) {}
+}
+function loadScript(src) {
+  return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => fail(new Error('load')); document.head.appendChild(s); });
+}
+function fbLoad() {
+  if (sync.loading) return sync.loading;
+  sync.loading = ['app', 'auth', 'firestore'].reduce((p, n) => p.then(() => loadScript(`https://www.gstatic.com/firebasejs/${FB_V}/firebase-${n}-compat.js`)), Promise.resolve())
+    .then(() => {
+      if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
+      sync.db = firebase.firestore();
+      firebase.auth().onAuthStateChanged(onAuth);
+      return firebase;
+    });
+  sync.loading.catch(() => { sync.loading = null; sync.status = 'unavailable'; syncRefresh(); });
+  return sync.loading;
+}
+function authMsg(e) {
+  const c = (e && e.code) || '';
+  if (c === 'auth/unauthorized-domain') return `This website isn’t on Firebase’s authorised domains yet. In Firebase, go to Authentication, Settings, Authorized domains and add ${location.hostname}.`;
+  if (c === 'auth/operation-not-allowed' || c === 'auth/configuration-not-found') return 'Google sign-in isn’t switched on yet. In Firebase, go to Authentication, Sign-in method and enable Google.';
+  if (c === 'auth/network-request-failed') return 'No connection. Try again when you’re online.';
+  return `Sign-in didn’t work (${c || (e && e.message) || 'unknown error'}). Try again.`;
+}
+function fsMsg(e) {
+  const c = (e && e.code) || '';
+  if (c === 'permission-denied') return 'Firebase refused access to your data. Check the Firestore rules were published.';
+  if (c === 'not-found' || c === 'failed-precondition') return 'The Firestore database isn’t set up yet. Create it in Firebase under Databases and storage, Firestore.';
+  if (c === 'unavailable') return 'You’re offline. Changes will upload when you’re back online.';
+  return `Sync hit a problem (${c || (e && e.message) || 'unknown error'}).`;
+}
+function syncRefresh() {
+  if (ui.view === 'prefs' && !drag && !(document.activeElement && document.activeElement.matches('#view input, #view textarea, #view select'))) render();
+}
+const hasLocalData = () => !!(S.onboarded && (Object.keys(S.days).length || S.xp > 0));
+function localDocs() {
+  const out = {}, rest = Object.assign({}, S), by = {};
+  delete rest.days;
+  out.meta = JSON.stringify(rest);
+  for (const k of Object.keys(S.days).sort()) { const m = 'm-' + k.slice(0, 7); (by[m] = by[m] || {})[k] = S.days[k]; }
+  for (const m in by) out[m] = JSON.stringify(by[m]);
+  return out;
+}
+
+async function syncSignIn() {
+  sync.status = 'loading'; sync.err = ''; sync.wanted = true; syncSaveMeta(); syncRefresh();
+  try {
+    await fbLoad();
+    const p = new firebase.auth.GoogleAuthProvider();
+    p.setCustomParameters({ prompt: 'select_account' });
+    try { await firebase.auth().signInWithPopup(p); }
+    catch (e) {
+      if (['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment', 'auth/cancelled-popup-request'].includes(e.code)) await firebase.auth().signInWithRedirect(p);
+      else throw e;
+    }
+  } catch (e) {
+    if (sync.status === 'unavailable') return;
+    sync.wanted = !!sync.user; syncSaveMeta();
+    if (e && e.code === 'auth/popup-closed-by-user') { sync.status = sync.user ? 'in' : 'off'; syncRefresh(); return; }
+    sync.status = sync.user ? 'in' : 'error'; sync.err = authMsg(e); syncRefresh(); toast(sync.err, 6000);
+  }
+}
+async function syncSignOut() {
+  if (sync.unsub) sync.unsub();
+  sync.unsub = null; sync.ref = null;
+  try { await firebase.auth().signOut(); } catch (e) {}
+  Object.assign(sync, { user: null, status: 'off', cache: {}, uid: null, wanted: false, last: 0 });
+  syncSaveMeta(); render(); toast('Signed out. Your data stays on this device.');
+}
+function onAuth(user) {
+  if (user) { if (!sync.user || sync.user.uid !== user.uid) syncStart(user); return; }
+  if (sync.unsub) sync.unsub();
+  Object.assign(sync, { user: null, ref: null, unsub: null });
+  if (sync.status !== 'error') sync.status = 'off';
+  syncRefresh();
+}
+async function syncStart(user) {
+  sync.user = user; sync.status = 'loading'; sync.wanted = true;
+  if (sync.uid !== user.uid) { sync.cache = {}; sync.uid = user.uid; }
+  syncSaveMeta(); syncRefresh();
+  sync.ref = sync.db.collection('users').doc(user.uid).collection('data');
+  try {
+    const snap = await sync.ref.get(), remote = {};
+    snap.forEach(d => { remote[d.id] = d.data(); });
+    const first = !Object.keys(sync.cache).length;
+    if (!remote.meta) await syncPush(true);
+    else if (first && hasLocalData()) { syncAsk(remote); return; }
+    else syncMerge(remote, first);
+    syncListen();
+    toast(`Signed in as ${user.email || user.displayName}. Sync is on.`);
+  } catch (e) { sync.status = 'error'; sync.err = fsMsg(e); syncRefresh(); toast(sync.err, 6000); }
+}
+/* Decide per document whether the remote copy should replace ours. */
+function takeRemote(id, r, local) {
+  if (r.json === sync.cache[id] || r.json === local[id]) return false;
+  if (local[id] === undefined || local[id] === sync.cache[id]) return true;
+  return (r.t || 0) > (sync.localT || 0);
+}
+function applyDoc(id, json) {
+  const v = JSON.parse(json);
+  if (id === 'meta') { const days = S.days; S = migrate(Object.assign(v, { days })); }
+  else if (id.startsWith('m-')) { const pre = id.slice(2); for (const k of Object.keys(S.days)) if (k.startsWith(pre)) delete S.days[k]; Object.assign(S.days, v); }
+}
+function finishApply() {
+  sync.applying = true;
+  S.habits.forEach(fillLaws); saveNow();
+  sync.applying = false;
+  applyTheme();
+  if (S.onboarded && !$('#onb').hidden) $('#onb').hidden = true;
+  if (drag) return;
+  if (document.activeElement && document.activeElement.matches('#view input, #view textarea, #view select')) { sync.renderLater = true; return; }
+  render();
+}
+function syncMerge(remote, all) {
+  const local = localDocs();
+  let changed = false;
+  for (const [id, r] of Object.entries(remote)) {
+    if (!r || typeof r.json !== 'string') continue;
+    if (all ? r.json !== local[id] : takeRemote(id, r, local)) { applyDoc(id, r.json); changed = true; }
+    sync.cache[id] = r.json;
+  }
+  if (changed) finishApply();
+  sync.status = 'in'; syncSaveMeta();
+  syncPush(false);
+}
+function syncListen() {
+  if (sync.unsub) sync.unsub();
+  sync.unsub = sync.ref.onSnapshot(snap => {
+    const local = localDocs();
+    let changed = false;
+    snap.docChanges().forEach(ch => {
+      if (ch.type === 'removed') return;
+      const d = ch.doc, r = d.data();
+      if (d.metadata.hasPendingWrites || !r || r.dev === sync.dev) return;
+      if (takeRemote(d.id, r, local)) { applyDoc(d.id, r.json); changed = true; }
+      sync.cache[d.id] = r.json;
+    });
+    if (changed) { sync.last = Date.now(); syncSaveMeta(); finishApply(); toast('Updated from your other device', 1800); }
+  }, e => { sync.status = 'error'; sync.err = fsMsg(e); syncRefresh(); });
+}
+async function syncPush(all, removeIds = []) {
+  if (!sync.ref) return;
+  clearTimeout(sync.timer);
+  const docs = localDocs(), batch = sync.db.batch(), sent = {};
+  let n = 0;
+  for (const id in docs) { if (!all && docs[id] === sync.cache[id]) continue; batch.set(sync.ref.doc(id), { json: docs[id], t: Date.now(), dev: sync.dev }); sent[id] = docs[id]; n++; }
+  for (const id of removeIds) { batch.delete(sync.ref.doc(id)); n++; }
+  if (!n) { if (sync.status !== 'in') { sync.status = 'in'; syncRefresh(); } return; }
+  sync.status = 'saving'; syncRefresh();
+  try {
+    await batch.commit();
+    Object.assign(sync.cache, sent); removeIds.forEach(id => delete sync.cache[id]);
+    sync.last = Date.now(); sync.status = 'in'; syncSaveMeta();
+  } catch (e) { sync.status = 'error'; sync.err = fsMsg(e); }
+  syncRefresh();
+}
+function syncSchedule() {
+  if (sync.applying || !sync.ref) return;
+  sync.localT = Date.now();
+  clearTimeout(sync.timer); sync.timer = setTimeout(() => syncPush(false), 1500);
+}
+function syncAsk(remote) {
+  sync.pending = remote; sync.status = 'in';
+  let rd = 0; for (const id in remote) if (id.startsWith('m-')) try { rd += Object.keys(JSON.parse(remote[id].json)).length; } catch (e) {}
+  const when = remote.meta.t ? new Date(remote.meta.t) : null;
+  openSheet('Which data should we keep?', `
+    <p>Your account already has Discipline OS data${when ? `, last saved ${dateShort(fmtKey(when))} at ${when.toTimeString().slice(0, 5)}` : ''}, and this device has its own.</p>
+    <div class="pastr"><div><b>Your account:</b> ${plural(rd, 'day')} of history</div><div><b>This device:</b> ${plural(Object.keys(S.days).length, 'day')} of history, ${S.xp.toLocaleString('en-GB')} XP</div></div>
+    <div class="stack" style="gap:8px">
+      <button class="btn accent block" data-act="sync-remote">Use my account’s data on this device</button>
+      <button class="btn ghost block" data-act="sync-local">Replace my account with this device’s data</button>
+    </div>
+    <p class="note">Either way, everything stays in sync from now on. If unsure, back up this device first in Settings.</p>`);
+  syncRefresh();
+}
+function syncCard() {
+  const s = sync, t = s.last ? new Date(s.last).toTimeString().slice(0, 5) : '';
+  let body;
+  if (s.user) {
+    const line = s.status === 'saving' || s.status === 'loading' ? 'Syncing…' : s.status === 'error' ? `<span class="err">${esc(s.err)}</span>` : `Up to date${t ? `, last synced at ${t}` : ''}.`;
+    body = `<p>Signed in as <b>${esc(s.user.email || s.user.displayName || 'you')}</b>. ${line}</p>
+      <div class="row"><button class="btn ghost sm" data-act="sync-now">Sync now</button><button class="btn ghost sm" data-act="sync-out">Sign out</button></div>`;
+  } else if (s.status === 'unavailable') {
+    body = `<p class="note">Sync can’t load here. Use the website version, which syncs: <a href="${SITE_URL}" target="_blank" rel="noopener">${SITE_URL.replace('https://', '')}</a></p>`;
+  } else {
+    body = `<p class="note">Sign in to keep your habits, tasks, goals and history the same on your phone and laptop. Everything still works offline, and changes upload when you’re back online.</p>
+      ${s.status === 'error' && s.err ? `<p class="err">${esc(s.err)}</p>` : ''}
+      <div><button class="btn accent" data-act="sync-in" ${s.status === 'loading' ? 'disabled' : ''}>${s.status === 'loading' ? 'Signing in…' : 'Sign in with Google'}</button></div>`;
+  }
+  return `<section class="card"><div class="ch"><h2>Sync across devices</h2>${s.user ? '<span class="meta">On</span>' : ''}</div>${body}</section>`;
+}
+Object.assign(ACT, {
+  'sync-in': () => syncSignIn(),
+  'sync-out': () => syncSignOut(),
+  'sync-now': async () => { await syncPush(false); if (sync.status === 'in') toast('All synced'); else if (sync.err) toast(sync.err, 5000); },
+  'sync-remote': () => { const r = sync.pending; sync.pending = null; closeSheet(); syncMerge(r, true); syncListen(); toast('Your account’s data is now on this device'); },
+  'sync-local': async () => {
+    const r = sync.pending; sync.pending = null; closeSheet();
+    const local = localDocs();
+    await syncPush(true, Object.keys(r).filter(id => !(id in local)));
+    syncListen(); toast('This device’s data is now in your account');
+  },
+});
+document.addEventListener('focusout', () => { if (sync.renderLater) setTimeout(() => { if (sync.renderLater && !(document.activeElement && document.activeElement.matches('input,textarea,select'))) { sync.renderLater = false; render(); } }, 0); });
+window.addEventListener('pagehide', () => { if (sync.ref) syncPush(false); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && sync.ref) syncPush(false); });
+
+/* =========================================================
    Boot
    ========================================================= */
 try { new ResizeObserver(() => document.documentElement.style.setProperty('--hdr', $('.top').offsetHeight + 'px')).observe($('.top')); } catch (e) {}
@@ -2506,6 +2738,7 @@ ui.view = VIEWS[startView] ? startView : 'today';
 render();
 if (S.focusRun) showLaser();
 if (!S.onboarded) onboard();
+if (sync.wanted) fbLoad().catch(() => {});
 })();
 </script>
 </body>
