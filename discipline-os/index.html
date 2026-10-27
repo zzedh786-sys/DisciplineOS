@@ -359,6 +359,8 @@ details[open]>summary::before{content:"− "}
 .nowline::after{content:"";flex:1;border-top:2px solid var(--leaf)}
 
 .tcard{display:grid;grid-template-columns:22px 26px minmax(0,1fr);grid-template-areas:"g k b" "g k a";gap:6px 9px;align-items:center;padding:12px 12px 12px 6px;border-radius:16px;background:var(--surface);position:relative;touch-action:pan-y}
+.tcard.compact{grid-template-columns:26px minmax(0,1fr);grid-template-areas:"k b" "k a";padding-left:12px}
+.tcard.compact .grip{display:none}
 .tcard.u-urgent{box-shadow:inset 0 0 0 1.5px var(--u-urgent)}
 .tcard .grip{grid-area:g;align-self:stretch;display:grid;place-items:center;color:var(--ghost);cursor:grab;touch-action:none;border-radius:8px}
 .tcard .grip svg{width:12px;height:18px}
@@ -1125,6 +1127,7 @@ const NAV = [
   ['progress', 'Progress', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M4 15l5-5 4 3 7-8" /><path d="M3 12.5h18" stroke-dasharray="2 2.5" opacity=".55"/></svg>'],
 ];
 const NAV_EXTRA = [
+  ['plan', 'Plan ahead', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4M13 15h4"/></svg>'],
   ['reflect', 'Reflect', I.moon],
   ['prefs', 'Settings', '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>'],
 ];
@@ -1175,7 +1178,7 @@ function barChart(keys, scores, avg) {
    Views
    ========================================================= */
 const ui = { qShift: 0, view: 'today', htab: 'am', prog: 'week', progOff: 0, hz: 'week', gp: {}, showDone: false, confirm: '', exportText: '' };
-const VIEWS = { today: vToday, habits: vHabits, tasks: vTasks, goals: vGoals, progress: vProgress, reflect: vReflect, prefs: vPrefs };
+const VIEWS = { today: vToday, plan: vPlan, habits: vHabits, tasks: vTasks, goals: vGoals, progress: vProgress, reflect: vReflect, prefs: vPrefs };
 
 function render() {
   $('#view').innerHTML = VIEWS[ui.view]();
@@ -1332,39 +1335,51 @@ function checkin(rec) {
     <div class="energy" aria-label="Energize habits done today">${en}</div>
     ${rec.sleep !== null && rec.sleep !== '' && +rec.sleep < 6.5 ? `<p class="note">Under 6.5 hours. Take the 2-minute versions where you need to and protect tonight’s wind-down.</p>` : ''}`;
 }
-function planBlock(rec) {
-  const planned = rec.planned.map(taskById).filter(Boolean);
+/* Planning pieces shared by Today and Plan ahead. k is the day being planned; only today gets "now", focus and done controls on blocks. */
+const dayLabel = k => k === todayKey() ? 'today' : k === addDays(todayKey(), 1) ? 'tomorrow' : dateShort(k);
+function blocksList(rec, k) {
+  const isToday = k === todayKey(), nm = nowMin();
   const blocks = rec.blocks.slice().sort((a, b) => (toMin(a.start) ?? 0) - (toMin(b.start) ?? 0));
-  const nm = nowMin();
-  let nowShown = false;
+  if (!blocks.length) return '';
+  let nowShown = !isToday;
   const blk = b => {
     const s = toMin(b.start), e = toMin(b.end);
-    const isNow = s !== null && e !== null && nm >= s && nm < e, past = e !== null && nm >= e;
+    const isNow = isToday && s !== null && e !== null && nm >= s && nm < e, past = isToday && e !== null && nm >= e;
     let pre = '';
     if (!nowShown && s !== null && s > nm) { nowShown = true; pre = `<div class="nowline">Now, ${fromMin(nm)}</div>`; }
     if (isNow) nowShown = true;
     const len = s !== null && e !== null ? e - s : 0;
     return `${pre}<div class="blk ${isNow ? 'now' : ''} ${past ? 'past' : ''} ${b.done ? 'done' : ''}">
       <div class="tm">${esc(b.start)}–${esc(b.end)}<small>${len > 0 ? fmtMin(len) : ''}</small></div>
-      <div class="bl" style="min-width:0;overflow-wrap:anywhere">${esc(b.label)}</div>
-      <div class="row" style="gap:4px;flex-wrap:nowrap">${!b.done && !past ? `<button class="btn ghost sm" data-act="laser" data-min="${clamp(isNow ? e - nm : len, 5, 120)}" data-label="${esc(b.label)}">Focus</button>` : ''}<button class="btn ghost sm" data-act="blk-done" data-id="${b.id}" aria-label="${b.done ? 'Mark block not done' : 'Mark block done'}">${b.done ? 'undo' : '✓'}</button><button class="btn ghost sm" data-act="blk-del" data-id="${b.id}" aria-label="Remove block">✕</button></div>
+      <button class="bl" style="min-width:0;overflow-wrap:anywhere;text-align:left" data-act="blk-edit" data-k="${k}" data-id="${b.id}" aria-label="Edit block ${esc(b.label)}">${esc(b.label)}</button>
+      <div class="row" style="gap:4px;flex-wrap:nowrap">${isToday && !b.done && !past ? `<button class="btn ghost sm" data-act="laser" data-min="${clamp(isNow ? e - nm : len, 5, 120)}" data-label="${esc(b.label)}">Focus</button>` : ''}${isToday ? `<button class="btn ghost sm" data-act="blk-done" data-k="${k}" data-id="${b.id}" aria-label="${b.done ? 'Mark block not done' : 'Mark block done'}">${b.done ? 'undo' : '✓'}</button>` : ''}<button class="btn ghost sm" data-act="blk-del" data-k="${k}" data-id="${b.id}" aria-label="Remove block">✕</button></div>
     </div>`;
   };
-  const blockedMin = blocks.reduce((a, b) => { const s = toMin(b.start), e = toMin(b.end); return a + (s !== null && e !== null && e > s ? e - s : 0); }, 0);
+  return `<div class="blocks tray">${blocks.map(blk).join('')}${!nowShown ? `<div class="nowline">Now, ${fromMin(nm)}</div>` : ''}</div>`;
+}
+function planItems(rec, k) {
+  const planned = rec.planned.map(taskById).filter(Boolean), isToday = k === todayKey();
+  return `${planned.length ? `<div class="stack" style="gap:8px">${planned.map(t => taskCard(t, { compact: true, k })).join('')}</div><p class="note">Tap a task to edit it.</p>` : ''}
+    <form class="inline" data-form="quick-plan" data-k="${k}"><input name="title" id="qpTitle-${k}" maxlength="120" placeholder="Add a task for ${dayLabel(k)}" autocomplete="off"><button class="btn ghost">Add</button></form>
+    <div class="row"><button class="btn soft sm" data-act="plan-pick" data-k="${k}">Pick from task list</button><button class="btn soft sm" data-act="blk-new" data-k="${k}">Block out time</button>${isToday ? `<button class="btn soft sm" data-act="laser-pick">Start focus</button>` : ''}</div>
+    ${blocksList(rec, k)}`;
+}
+function planBlock(rec) {
+  const k = todayKey(), planned = rec.planned.map(taskById).filter(Boolean), open = planned.filter(t => !t.done);
+  const blockedMin = rec.blocks.reduce((a, b) => { const s = toMin(b.start), e = toMin(b.end); return a + (s !== null && e !== null && e > s ? e - s : 0); }, 0);
   const tq = (S.settings.quoteCats || []).includes('time') ? pickQuote('plan' + todayKey() + ':' + ui.qShift, ['time']) : null;
   return `<div class="ch"><h2>Today’s plan</h2><span class="meta">${planned.length ? `${planned.filter(t => t.done).length} of ${planned.length} tasks done` : 'Nothing planned yet'}</span></div>
     ${tq && tq.cat === 'time' ? `<p class="planq">“${esc(tq.t)}” <span>${esc(tq.a)}</span></p>` : ''}
     <div class="ledger"><span>Focus <b>${fmtMin(focusMin(rec))}</b></span><span>Time-blocked <b>${fmtMin(blockedMin)}</b></span><span class="lost">Lost to slips <b>${fmtMin(lostMin(rec))}</b></span></div>
-    ${planned.length ? `<div class="stack" style="gap:8px">${planned.map(t => taskCard(t, { compact: true })).join('')}</div>` : ''}
-    <form class="inline" data-form="quick-plan"><input name="title" id="qpTitle" maxlength="120" placeholder="Add a task for today" autocomplete="off"><button class="btn ghost">Add</button></form>
-    <div class="row"><button class="btn soft sm" data-act="plan-pick">Pick from task list</button><button class="btn soft sm" data-act="blk-new">Block out time</button><button class="btn soft sm" data-act="laser-pick">Start focus</button></div>
-    ${blocks.length ? `<div class="blocks tray">${blocks.map(blk).join('')}${!nowShown ? `<div class="nowline">Now, ${fromMin(nm)}</div>` : ''}</div>` : ''}`;
+    ${planItems(rec, k)}
+    <div class="row"><button class="btn ghost sm" data-act="plan-ahead" data-k="${addDays(k, 1)}">Plan tomorrow</button>${open.length ? `<button class="btn ghost sm" data-act="plan-move">Move ${plural(open.length, 'unfinished task')} to tomorrow</button>` : ''}</div>`;
 }
 function bedBlock(rec) {
   const r = rec.reflection, bed = toMin(S.settings.bed);
   return `<div class="ch"><h2>${r ? 'Day reflected' : 'Close the day'}</h2><span class="meta">${r ? 'Done' : `+${XP.reflect} XP`}</span></div>
     ${r ? `<p>${r.tomorrow ? `Tomorrow’s Highlight: <b>${esc(r.tomorrow)}</b>` : 'Reflection saved.'}${r.adjust ? `<br><span class="muted">Adjusting: ${esc(r.adjust)}</span>` : ''}</p><div><button class="btn ghost sm" data-act="nav" data-v="reflect">Edit reflection</button></div>`
-      : `<p class="small">Two minutes: what worked, what got in the way, and the one thing to change tomorrow.${bed !== null ? ` Screens off by ${fromMin(bed - 45)}.` : ''}</p><div><button class="btn accent" data-act="nav" data-v="reflect">Reflect now</button></div>`}`;
+      : `<p class="small">Two minutes: what worked, what got in the way, and the one thing to change tomorrow.${bed !== null ? ` Screens off by ${fromMin(bed - 45)}.` : ''}</p><div><button class="btn accent" data-act="nav" data-v="reflect">Reflect now</button></div>`}
+    <div><button class="btn ghost sm" data-act="plan-ahead" data-k="${addDays(todayKey(), 1)}">Plan tomorrow</button></div>`;
 }
 function guardCard(rec) {
   if (!S.bad.length) return '';
@@ -1398,6 +1413,39 @@ function vToday() {
     </li>`).join('')}</ol>`;
   const fab = S.bad.length ? `<button class="fab" data-act="urge-open">${I.wave}<span>Tempted?</span></button>` : '';
   return raceHero(k) + highlightCard(rec, k) + quoteCard(k) + timeline + guardCard(rec) + fab;
+}
+
+/* ---------- Plan ahead ---------- */
+function vPlan() {
+  const tk = todayKey(), tm = addDays(tk, 1);
+  const k = ui.planK && ui.planK > tk ? ui.planK : tm; ui.planK = k;
+  const rec = day(k), d = keyToDate(k), hl = rec.highlight;
+  const hasPlan = x => { const r = peek(x); return !!(r && ((r.planned || []).length || (r.blocks || []).length || (r.highlight && r.highlight.text))); };
+  const chips = [...Array(7)].map((_, i) => addDays(tm, i)).map(x => `<button class="chip ${x === k ? 'on' : ''}" data-act="plan-day" data-k="${x}" aria-pressed="${x === k}">${x === tm ? 'Tomorrow' : dateShort(x)}${hasPlan(x) ? ' <small>planned</small>' : ''}</button>`).join('');
+  const later = Object.keys(S.days).filter(x => x > addDays(tm, 6) && hasPlan(x)).sort();
+  const habitsN = S.habits.filter(h => isScheduled(h, k)).length;
+  const leftover = k === tm ? (peek(tk) || { planned: [] }).planned.map(taskById).filter(t => t && !t.done && !rec.planned.includes(t.id)) : [];
+  const sug = hlSuggestions(k);
+  const hlBlock = hl && hl.text
+    ? `<section class="hl"><div class="hl-k"><span>Highlight for ${esc(dayLabel(k))}</span><span>+${XP.highlight} XP</span></div><p class="hl-text">${esc(hl.text)}</p><div class="row"><button class="btn out" data-act="hl-clear" data-k="${k}">Change Highlight</button></div></section>`
+    : `<section class="hl set"><h2>What one thing would make ${esc(dayLabel(k))} a win?</h2>
+        <form class="inline" data-form="hl" data-k="${k}"><input name="text" id="hlText-${k}" maxlength="120" placeholder="e.g. Film the NEWS2 video" autocomplete="off"><button class="btn accent">Set</button></form>
+        ${sug.length ? `<div class="chips">${sug.map(x => `<button class="chip" data-act="hl-pick" data-k="${k}" data-text="${esc(x.text)}" data-task="${x.taskId || ''}">${esc(x.text)} <small>${esc(x.tag)}</small></button>`).join('')}</div>` : ''}
+      </section>`;
+  return `<section class="card">
+      <div class="ch"><h2>Plan ahead</h2></div>
+      <p class="note">Set the Highlight, tasks and time blocks for a future day. They’ll be waiting on Today when the day comes.</p>
+      <div class="chips">${chips}</div>
+      <label class="field" style="max-width:220px"><span>Or pick a date</span><input type="date" id="planDate" data-bind="plan-date" min="${tm}" value="${k}"></label>
+      ${later.length ? `<p class="note">Also planned: ${later.map(x => `<button class="link" data-act="plan-day" data-k="${x}">${dateShort(x)}</button>`).join(', ')}</p>` : ''}
+    </section>
+    <section class="card">
+      <div class="ch"><div><h2>${k === tm ? 'Tomorrow' : DAYS_LONG[d.getDay()]}</h2><p class="note">${d.getDate()} ${MONTHS[d.getMonth()]}${k === tm ? `, ${DAYS_LONG[d.getDay()]}` : ''}</p></div><span class="meta">${plural(habitsN, 'habit')} scheduled</span></div>
+      ${hlBlock}
+      ${leftover.length ? `<div><button class="btn soft sm" data-act="plan-carry" data-k="${k}">Bring over ${plural(leftover.length, 'unfinished task')} from today</button></div>` : ''}
+      <h3>Tasks and time blocks</h3>
+      ${planItems(rec, k)}
+    </section>`;
 }
 
 /* ---------- Habits ---------- */
@@ -1485,17 +1533,22 @@ function dueLabel(t) {
   if (n === 1) return `<span>due tomorrow</span>`;
   return `<span>due ${n < 7 ? DOW[dow(t.due)] : dm(t.due)}</span>`;
 }
+function plannedAhead() {
+  const tk = todayKey(), out = {};
+  for (const k of Object.keys(S.days).sort()) if (k > tk) for (const id of S.days[k].planned || []) if (!out[id]) out[id] = k;
+  return out;
+}
 function taskCard(t, o = {}) {
-  const planned = day().planned.includes(t.id), g = t.goalId ? goalById(t.goalId) : null;
-  return `<div class="tcard u-${t.urgency} ${t.done ? 'done' : ''}" data-id="${t.id}">
+  const planned = (peek(todayKey()) || { planned: [] }).planned.includes(t.id), g = t.goalId ? goalById(t.goalId) : null, ahead = o.ahead && o.ahead[t.id];
+  return `<div class="tcard u-${t.urgency} ${t.done ? 'done' : ''} ${o.compact ? 'compact' : ''}" data-id="${t.id}">
     <button class="grip" data-grip aria-label="Drag to another urgency column" ${o.compact ? 'tabindex="-1"' : ''}>${I.grip}</button>
     <button class="tick" data-act="t-done" data-id="${t.id}" aria-label="${t.done ? 'Mark not done' : 'Mark done'}">${I.check}</button>
-    <button class="tb" data-act="t-open" data-id="${t.id}"><span class="tt">${esc(t.title)} ${t.ex ? '<span class="ex">example</span>' : ''}</span>${t.due || g || t.notes ? `<span class="tm">${dueLabel(t)}${g ? `<span>→ ${esc(g.title)}</span>` : ''}${t.notes ? '<span>notes</span>' : ''}</span>` : ''}</button>
-    <div class="ta"><button class="upill" data-act="t-cycle" data-id="${t.id}" title="Tap to change urgency">${URG_NAME[t.urgency]}</button>${o.compact ? '' : `<button class="todaybtn ${planned ? 'on' : ''}" data-act="t-plan" data-id="${t.id}" aria-pressed="${planned}">${planned ? '★ Today' : '+ Today'}</button>`}</div>
+    <button class="tb" data-act="t-open" data-id="${t.id}"><span class="tt">${esc(t.title)} ${t.ex ? '<span class="ex">example</span>' : ''}</span>${t.due || g || t.notes || ahead ? `<span class="tm">${dueLabel(t)}${ahead ? `<span>planned for ${esc(dayLabel(ahead))}</span>` : ''}${g ? `<span>→ ${esc(g.title)}</span>` : ''}${t.notes ? '<span>notes</span>' : ''}</span>` : ''}</button>
+    <div class="ta"><button class="upill" data-act="t-cycle" data-id="${t.id}" title="Tap to change urgency">${URG_NAME[t.urgency]}</button>${o.compact ? `<button class="todaybtn" data-act="plan-rm" data-k="${o.k}" data-id="${t.id}" aria-label="Remove ${esc(t.title)} from the plan">Remove</button>` : `<button class="todaybtn ${planned ? 'on' : ''}" data-act="t-plan" data-id="${t.id}" aria-pressed="${planned}">${planned ? '★ Today' : '+ Today'}</button>`}</div>
   </div>`;
 }
 function vTasks() {
-  const open = S.tasks.filter(t => ui.showDone || !t.done);
+  const open = S.tasks.filter(t => ui.showDone || !t.done), ahead = plannedAhead();
   const doneN = S.tasks.filter(t => t.done).length, exN = S.tasks.filter(t => t.ex).length + S.goals.filter(g => g.ex).length;
   return `<section class="card">
       <div class="ch"><h2>All tasks</h2><span class="meta">${S.tasks.filter(t => !t.done).length} open, ${doneN} done</span></div>
@@ -1514,7 +1567,7 @@ function vTasks() {
       const list = open.filter(t => t.urgency === u).sort((a, b) => (!!a.done - !!b.done) || a.order - b.order || a.created - b.created);
       return `<section class="col u-${u}" data-col="${u}">
         <div class="colh"><h3>${URG_NAME[u]}</h3><span>${list.filter(t => !t.done).length}</span></div>
-        <div class="clist">${list.map(t => taskCard(t)).join('')}</div>
+        <div class="clist">${list.map(t => taskCard(t, { ahead })).join('')}</div>
       </section>`;
     }).join('')}</div>`;
 }
@@ -1881,6 +1934,7 @@ function mTask(t) {
     <div class="field"><span>Urgency</span><div class="chips">${['routine', 'semi', 'urgent'].map(u => `<label class="chip"><input type="radio" name="urgency" value="${u}" ${t.urgency === u ? 'checked' : ''}>${URG_NAME[u]}</label>`).join('')}</div></div>
     <div class="row"><label class="field grow"><span>Due date</span><input type="date" name="due" id="mtDue" value="${esc(t.due || '')}"></label>
       <label class="field grow"><span>Moves this goal forward</span><select name="goal" id="mtGoal"><option value="">None</option>${goals.map(g => `<option value="${g.id}" ${t.goalId === g.id ? 'selected' : ''}>${HZ_SHORT[g.horizon]}: ${esc(g.title)}</option>`).join('')}</select></label></div>
+    <label class="field"><span>Plan it for a day (optional)</span><input type="date" name="planOn" id="mtPlanOn" min="${todayKey()}" value="${esc(plannedAhead()[t.id] || ((peek(todayKey()) || { planned: [] }).planned.includes(t.id) ? todayKey() : ''))}"></label>
     <label class="field"><span>Notes</span><textarea name="notes" id="mtNotes" rows="3" maxlength="1000">${esc(t.notes)}</textarea></label>
     <div class="row"><button class="btn">Save</button>${t.done ? '' : `<button type="button" class="btn ghost" data-act="t-hl" data-id="${t.id}">Make it today’s Highlight</button>`}</div>
     <div class="row between"><span class="tiny muted">Added ${dm(fmtKey(new Date(t.created)))}${t.done ? `, done ${dm(t.doneKey || todayKey())}` : ''}</span><button type="button" class="btn danger sm" data-act="t-del" data-id="${t.id}">${ui.confirm === 't-' + t.id ? 'Tap again to delete' : 'Delete task'}</button></div>
@@ -1897,23 +1951,26 @@ function mGoal(g) {
     <div class="row"><button class="btn">Save goal</button><button type="button" class="btn danger" data-act="g-del" data-id="${g.id}">${ui.confirm === 'g-' + g.id ? 'Tap again to delete' : 'Delete'}</button></div>
   </form>`);
 }
-function mPlanPick() {
-  const rec = day(), open = S.tasks.filter(t => !t.done).sort(taskSort);
-  openSheet('Plan today', `<p class="small muted">Tap to add or remove. Keep it short: your Highlight plus a few.</p>
-    <div class="stack" style="gap:6px">${open.map(t => { const on = rec.planned.includes(t.id); return `<button class="tcard u-${t.urgency}" style="grid-template-columns:26px minmax(0,1fr);grid-template-areas:'k b';text-align:left;${on ? 'box-shadow:inset 0 0 0 2px var(--ink),inset 3px 0 0 var(--uc)' : ''}" data-act="pick-toggle" data-id="${t.id}"><span class="tick" style="${on ? 'background:var(--ink);color:var(--bg);box-shadow:none' : ''}">${I.check}</span><span class="tb"><span class="tt">${esc(t.title)}</span><span class="tm"><span>${URG_NAME[t.urgency]}</span>${dueLabel(t)}</span></span></button>`; }).join('') || '<div class="empty">No open tasks. Add some on the Tasks page.</div>'}</div>
+function mPlanPick(k = todayKey()) {
+  const rec = day(k), open = S.tasks.filter(t => !t.done).sort(taskSort);
+  openSheet(`Plan ${dayLabel(k)}`, `<p class="small muted">Tap to add or remove. Keep it short: your Highlight plus a few.</p>
+    <div class="stack" style="gap:6px">${open.map(t => { const on = rec.planned.includes(t.id); return `<button class="tcard u-${t.urgency}" style="grid-template-columns:26px minmax(0,1fr);grid-template-areas:'k b';text-align:left;${on ? 'box-shadow:inset 0 0 0 2px var(--ink),inset 3px 0 0 var(--uc)' : ''}" data-act="pick-toggle" data-k="${k}" data-id="${t.id}"><span class="tick" style="${on ? 'background:var(--ink);color:var(--bg);box-shadow:none' : ''}">${I.check}</span><span class="tb"><span class="tt">${esc(t.title)}</span><span class="tm"><span>${URG_NAME[t.urgency]}</span>${dueLabel(t)}</span></span></button>`; }).join('') || '<div class="empty">No open tasks. Add some on the Tasks page.</div>'}</div>
     <button class="btn block" data-act="close">Done</button>`);
 }
-function mBlock() {
-  const rec = day(), nm = Math.min(Math.ceil(nowMin() / 15) * 15, 1380), end = Math.min(nm + 60, 1439);
+function mBlock(k = todayKey(), id = '') {
+  const rec = day(k), b = id ? rec.blocks.find(x => x.id === id) : null;
+  const st = k === todayKey() ? Math.min(Math.ceil(nowMin() / 15) * 15, 1380) : 540;
+  const start = b ? b.start : fromMin(st), end = b ? b.end : fromMin(Math.min(st + 60, 1439));
   const opts = [];
   if (rec.highlight && rec.highlight.text) opts.push(['hl', `★ ${rec.highlight.text}`]);
   rec.planned.map(taskById).filter(t => t && !t.done).forEach(t => opts.push([t.id, t.title]));
-  openSheet('Block out time', `<form class="stack" data-form="block">
-    <div class="row"><label class="field grow"><span>Start</span><input type="time" name="start" id="bkStart" required value="${fromMin(nm)}"></label><label class="field grow"><span>End</span><input type="time" name="end" id="bkEnd" required value="${fromMin(end)}"></label></div>
-    ${opts.length ? `<label class="field"><span>For</span><select name="link" id="bkLink"><option value="">Something else</option>${opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select></label>` : ''}
-    <label class="field"><span>Label ${opts.length ? '(if something else)' : ''}</span><input name="label" id="bkLabel" maxlength="80" placeholder="e.g. Gym, admin, film video"></label>
+  const custom = b && !(b.link && opts.some(o => o[0] === b.link));
+  openSheet(b ? 'Edit time block' : `Block out time ${k === todayKey() ? '' : `for ${dayLabel(k)}`}`, `<form class="stack" data-form="block" data-k="${k}" data-id="${b ? b.id : ''}">
+    <div class="row"><label class="field grow"><span>Start</span><input type="time" name="start" id="bkStart" required value="${esc(start)}"></label><label class="field grow"><span>End</span><input type="time" name="end" id="bkEnd" required value="${esc(end)}"></label></div>
+    ${opts.length ? `<label class="field"><span>For</span><select name="link" id="bkLink"><option value="">Something else</option>${opts.map(([v, l]) => `<option value="${esc(v)}" ${b && b.link === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>` : ''}
+    <label class="field"><span>Label ${opts.length ? '(if something else)' : ''}</span><input name="label" id="bkLabel" maxlength="80" placeholder="e.g. Gym, admin, film video" value="${esc(custom || (b && !opts.length) ? b.label : '')}"></label>
     <p class="tiny muted">Make Time: put the Highlight in the calendar first, then protect it.</p>
-    <button class="btn block">Add block</button>
+    <div class="row"><button class="btn accent">${b ? 'Save block' : 'Add block'}</button>${b ? `<button type="button" class="btn danger" data-act="blk-del" data-k="${k}" data-id="${b.id}">Remove block</button>` : ''}</div>
   </form>`);
 }
 function mLaserPick() {
@@ -2086,10 +2143,14 @@ function obCollect() {
 /* =========================================================
    Actions
    ========================================================= */
-function setHighlight(text, taskId) {
+function setHighlight(text, taskId, k = todayKey()) {
   text = String(text || '').trim(); if (!text) return;
-  day().highlight = { text, taskId: taskId || null, done: false };
-  save(); render(); toast('Highlight set. Block time for it, then protect it.');
+  day(k).highlight = { text, taskId: taskId || null, done: false };
+  save(); render(); toast(k === todayKey() ? 'Highlight set. Block time for it, then protect it.' : `Highlight set for ${dayLabel(k)}.`);
+}
+function planTo(k, ids) {
+  const rec = day(k);
+  for (const id of ids) if (!rec.planned.includes(id)) rec.planned.push(id);
 }
 function completeTask(t, rect) {
   if (t.done) {
@@ -2129,8 +2190,20 @@ const ACT = {
     S.settings.quoteCats = Object.keys(QCATS).filter(x => on.has(x)); save(); render();
   },
   energy: a => { const rec = day(); rec.energy = rec.energy === +a.dataset.n ? null : +a.dataset.n; save(); render(); },
-  'hl-pick': a => setHighlight(a.dataset.text, a.dataset.task),
-  'hl-clear': () => { const rec = day(); rec.highlight = null; save(); render(); },
+  'hl-pick': a => setHighlight(a.dataset.text, a.dataset.task, a.dataset.k || todayKey()),
+  'hl-clear': a => { const rec = day(a.dataset.k || todayKey()); rec.highlight = null; save(); render(); },
+  'plan-ahead': a => { ui.planK = a.dataset.k; closeSheet(); go('plan'); },
+  'plan-day': a => { ui.planK = a.dataset.k; render(); },
+  'plan-rm': a => { const rec = day(a.dataset.k); rec.planned = rec.planned.filter(x => x !== a.dataset.id); save(); render(); toast(`Removed from ${dayLabel(a.dataset.k)}’s plan`, 1600); },
+  'plan-move': () => {
+    const tk = todayKey(), rec = day(tk), ids = rec.planned.filter(id => { const t = taskById(id); return t && !t.done; });
+    planTo(addDays(tk, 1), ids); rec.planned = rec.planned.filter(id => !ids.includes(id));
+    save(); render(); toast(`${plural(ids.length, 'task')} moved to tomorrow`);
+  },
+  'plan-carry': a => {
+    const tk = todayKey(), ids = day(tk).planned.filter(id => { const t = taskById(id); return t && !t.done; });
+    planTo(a.dataset.k, ids); save(); render(); toast(`${plural(ids.length, 'task')} added to ${dayLabel(a.dataset.k)}`);
+  },
   'hl-done': a => {
     const rec = day(), hl = rec.highlight; if (!hl) return;
     const t = hl.taskId ? taskById(hl.taskId) : null;
@@ -2176,11 +2249,12 @@ const ACT = {
   'lz-pause': () => { const f = S.focusRun; if (!f) return; if (f.pausedAt) { f.pausedMs += Date.now() - f.pausedAt; f.pausedAt = null; $('#lzMsg').textContent = 'Back in. Just this.'; } else { f.pausedAt = Date.now(); $('#lzMsg').textContent = 'Paused. The clock waits for you.'; } saveNow(); lzTick(); },
   'lz-done': () => laserEnd('early'),
   'lz-abort': a => { if (a.dataset.sure) laserEnd('abort'); else { a.dataset.sure = '1'; a.textContent = 'Tap again to abandon'; } },
-  'plan-pick': () => mPlanPick(),
-  'pick-toggle': a => { const rec = day(), i = rec.planned.indexOf(a.dataset.id); if (i >= 0) rec.planned.splice(i, 1); else rec.planned.push(a.dataset.id); save(); mPlanPick(); render(); },
-  'blk-new': () => mBlock(),
-  'blk-done': a => { const b = day().blocks.find(x => x.id === a.dataset.id); if (b) { b.done = !b.done; save(); render(); } },
-  'blk-del': a => { const rec = day(); rec.blocks = rec.blocks.filter(x => x.id !== a.dataset.id); save(); render(); },
+  'plan-pick': a => mPlanPick(a.dataset.k || todayKey()),
+  'pick-toggle': a => { const k = a.dataset.k || todayKey(), rec = day(k), i = rec.planned.indexOf(a.dataset.id); if (i >= 0) rec.planned.splice(i, 1); else rec.planned.push(a.dataset.id); save(); mPlanPick(k); render(); },
+  'blk-new': a => mBlock(a.dataset.k || todayKey()),
+  'blk-edit': a => mBlock(a.dataset.k || todayKey(), a.dataset.id),
+  'blk-done': a => { const b = day(a.dataset.k || todayKey()).blocks.find(x => x.id === a.dataset.id); if (b) { b.done = !b.done; save(); render(); } },
+  'blk-del': a => { const rec = day(a.dataset.k || todayKey()); rec.blocks = rec.blocks.filter(x => x.id !== a.dataset.id); save(); closeSheet(); render(); },
   't-done': a => { const t = taskById(a.dataset.id); if (!t) return; completeTask(t, a.getBoundingClientRect()); render(); },
   't-open': a => { const t = taskById(a.dataset.id); if (t) mTask(t); },
   't-cycle': a => { const t = taskById(a.dataset.id); if (!t) return; cycleUrgency(t); render(); },
@@ -2221,7 +2295,7 @@ const ACT = {
   },
   prog: a => { ui.prog = a.dataset.v; ui.progOff = 0; render(); },
   'prog-nav': a => { const d = +a.dataset.d; ui.progOff = d === 0 ? 0 : Math.min(0, ui.progOff + d); render(); },
-  'day-open': a => mDay(a.dataset.k),
+  'day-open': a => { if (a.dataset.k > todayKey()) { ui.planK = a.dataset.k; go('plan'); } else mDay(a.dataset.k); },
   set: a => {
     const k = a.dataset.k; let v = a.dataset.v;
     if (v === 'true' || v === 'false') v = v === 'true';
@@ -2251,12 +2325,13 @@ const ACT = {
 };
 
 const FORMS = {
-  hl: f => setHighlight(f.elements.text.value),
+  hl: f => setHighlight(f.elements.text.value, null, f.dataset.k || todayKey()),
   'quick-plan': f => {
     const title = f.elements.title.value.trim(); if (!title) return;
     const col = S.tasks.filter(t => t.urgency === 'routine');
     const t = { id: uid(), title, urgency: 'routine', due: null, notes: '', goalId: null, created: Date.now(), done: null, doneKey: null, order: col.length ? Math.min(...col.map(x => x.order)) - 1 : 0 };
-    S.tasks.push(t); day().planned.push(t.id); save(); render(); setTimeout(() => { const i = $('#qpTitle'); i && i.focus(); }, 0);
+    const k = f.dataset.k || todayKey();
+    S.tasks.push(t); day(k).planned.push(t.id); save(); render(); setTimeout(() => { const i = $(`#qpTitle-${k}`); i && i.focus(); }, 0);
   },
   'task-new': f => {
     const title = f.elements.title.value.trim(); if (!title) return;
@@ -2271,7 +2346,10 @@ const FORMS = {
     const u = (f.querySelector('input[name=urgency]:checked') || {}).value || t.urgency;
     if (u !== t.urgency) { const col = S.tasks.filter(x => x.urgency === u); t.order = col.length ? Math.min(...col.map(x => x.order)) - 1 : 0; }
     Object.assign(t, { title: e.title.value.trim() || t.title, urgency: u, due: e.due.value || null, goalId: e.goal.value || null, notes: e.notes.value, ex: false });
+    const tk = todayKey(), prev = plannedAhead()[t.id] || ((peek(tk) || { planned: [] }).planned.includes(t.id) ? tk : ''), next = e.planOn.value >= tk ? e.planOn.value : '';
+    if (next !== prev) { if (prev) day(prev).planned = day(prev).planned.filter(x => x !== t.id); if (next) planTo(next, [t.id]); }
     save(); closeSheet(); render();
+    if (next !== prev && next) toast(`Planned for ${dayLabel(next)}`, 1600);
   },
   habit: f => {
     const e = f.elements, id = f.dataset.id;
@@ -2306,7 +2384,7 @@ const FORMS = {
     save(); render(); mSlipAfter(b, slip);
   },
   block: f => {
-    const e = f.elements, rec = day();
+    const e = f.elements, rec = day(f.dataset.k || todayKey());
     const s = toMin(e.start.value), en = toMin(e.end.value);
     if (s === null || en === null || en <= s) { toast('The end time needs to be after the start time.'); return; }
     let label = e.label.value.trim();
@@ -2314,8 +2392,10 @@ const FORMS = {
     if (link === 'hl' && rec.highlight) label = label || `★ ${rec.highlight.text}`;
     else if (link) { const t = taskById(link); if (t) label = label || t.title; }
     if (!label) label = 'Focus block';
-    rec.blocks.push({ id: uid(), start: e.start.value, end: e.end.value, label, link: link || null, done: false });
-    save(); closeSheet(); render();
+    const old = f.dataset.id && rec.blocks.find(x => x.id === f.dataset.id);
+    if (old) Object.assign(old, { start: e.start.value, end: e.end.value, label, link: link || null });
+    else rec.blocks.push({ id: uid(), start: e.start.value, end: e.end.value, label, link: link || null, done: false });
+    save(); closeSheet(); render(); toast(old ? 'Block updated' : 'Time blocked', 1400);
   },
   laser: f => laserStart(+(f.querySelector('input[name=min]:checked') || {}).value || 25, f.elements.label.value.trim() || 'Deep work'),
   'goal-new': f => {
@@ -2335,6 +2415,8 @@ const FORMS = {
   reflect: f => {
     const e = f.elements, rec = day(), first = !rec.reflection;
     rec.reflection = { t: Date.now(), energy: +((f.querySelector('input[name=energy]:checked') || {}).value || 0) || null, focus: +((f.querySelector('input[name=focus]:checked') || {}).value || 0) || null, win: e.win.value.trim(), blocks: $$('input[name=block]:checked', f).map(i => i.value), adjust: e.adjust.value.trim(), tomorrow: e.tomorrow.value.trim(), grateful: e.grateful.value.trim() };
+    const tmr = day(addDays(todayKey(), 1)), th = tmr.highlight;
+    if (rec.reflection.tomorrow && (!th || !th.text || th.from === 'reflect') && !(th && th.done)) tmr.highlight = { text: rec.reflection.tomorrow, taskId: null, done: false, from: 'reflect' };
     save();
     if (first) {
       const k = todayKey(), sc = dayScore(k), ys = dayScore(addDays(k, -1));
@@ -2459,6 +2541,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.dataset.bind === 'plan-date') { if (t.value && t.value > todayKey()) { ui.planK = t.value; render(); } else toast('Pick a day after today. Today’s plan is on the Today page.'); return; }
   if (t.dataset.bind === 'sleep') { const rec = day(); rec.sleep = t.value === '' ? null : clamp(+t.value, 0, 16); save(); render(); }
   if (t.dataset.bind === 'goal') { const g = goalById(t.dataset.id); if (g) { setGoalProgress(g, t.value, t.getBoundingClientRect()); render(); } }
   if (t.id === 'impFile' && t.files && t.files[0]) { const r = new FileReader(); r.onload = () => importData(String(r.result)); r.readAsText(t.files[0]); t.value = ''; }
