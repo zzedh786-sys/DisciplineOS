@@ -166,7 +166,7 @@ label.chip:has(input:focus-visible){outline:2.5px solid var(--violet);outline-of
 
 .field{display:grid;gap:6px;min-width:0}
 .field>span{font-size:14px;font-weight:700;color:var(--ink-2)}
-input[type=text],input[type=number],input[type=time],input[type=date],input:not([type]),select,textarea{width:100%;min-width:0;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;line-height:1.35;color:var(--ink)}
+input[type=text],input[type=number],input[type=time],input[type=date],input[type=email],input[type=password],input[type=tel],input:not([type]),select,textarea{width:100%;min-width:0;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:16px;line-height:1.35;color:var(--ink)}
 textarea{resize:vertical}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-soft)}
 .inline{display:flex;gap:8px;min-width:0}
@@ -511,7 +511,17 @@ table.hg td{padding:0}
 .sb{padding:4px 18px 0;display:grid;gap:16px}
 .sb>*{min-width:0}
 
-#onb{position:fixed;inset:0;z-index:96;background:var(--bg);overflow:auto;padding-block:calc(28px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#onb,#login{position:fixed;inset:0;z-index:96;background:var(--bg);overflow:auto;padding-block:calc(28px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.login-in{max-width:440px}
+.login-in .lbrand{display:flex;align-items:center;gap:9px;font:820 19px/1 var(--font-d);font-variation-settings:'wdth' 72}
+.login-in .lbrand svg{width:30px;height:20px}
+.gbtn{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line);min-height:50px;font-size:16px}
+.gbtn svg{width:20px;height:20px}
+.orline{display:flex;align-items:center;gap:12px;font-size:14px;color:var(--ink-3)}
+.orline::before,.orline::after{content:"";flex:1;border-top:1px solid var(--line)}
+.login-in form{display:grid;gap:10px}
+.login-in .ok{font-size:14.5px;font-weight:700;color:var(--leaf-ink)}
+#login{z-index:97}
 .onb-in{max-width:560px;margin:0 auto;display:grid;gap:20px}
 .onb-in h1{font:880 clamp(40px,11vw,66px)/.92 var(--font-d);font-variation-settings:'wdth' 74;letter-spacing:-.02em}
 .onb-in h1 em{font-style:normal;font-variation-settings:'wdth' 128}
@@ -561,6 +571,7 @@ table.hg td{padding:0}
 <div id="laser" class="ov" hidden role="dialog" aria-label="Laser focus"></div>
 <div id="urge" class="ov" hidden role="dialog" aria-label="Urge surfing"></div>
 <div id="onb" hidden role="dialog" aria-label="Set up Discipline OS"></div>
+<div id="login" hidden role="dialog" aria-label="Sign in to Discipline OS"></div>
 <div id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" id="sheet"></div></div>
 <div id="toast" hidden role="status" aria-live="polite"></div>
 <noscript><p style="padding:24px">Discipline OS needs JavaScript to run.</p></noscript>
@@ -2094,7 +2105,7 @@ function onboard() {
     <p>This is where you track your routines, habits, goals, tasks and focus, and see every day whether you are moving forward. It runs on two ideas: Atomic Habits (every habit is a vote for who you are becoming) and Make Time (one Highlight a day, protected with focus).</p>
     <label class="field"><span>What should we call you? (optional)</span><input id="obName" maxlength="30" value="${esc(S.name)}" placeholder="First name"></label>
     <button class="btn accent block" data-act="ob-next">Start</button>
-    <p class="note" style="text-align:center">Already use Discipline OS on another device? <button class="link" data-act="sync-in">Sign in with Google</button> to bring your data here.</p>`;
+    <p class="note" style="text-align:center">Already use Discipline OS on another device? <button class="link" data-act="login-open">Sign in</button> to bring your data here.</p>`;
   if (st === 1) body = `<div class="eyebrow">Step 1 of 3</div>
     <h1>Who are you becoming?</h1>
     <p>Write identity statements, one per line, starting with “I am someone who…”. Every habit you complete is a vote for one of them. Edit these examples or replace them.</p>
@@ -2599,9 +2610,9 @@ const SITE_URL = 'https://zzedh786-sys.github.io/DisciplineOS/discipline-os/';
 const SYNC_KEY = 'disciplineos.sync';
 function syncMeta() { try { return JSON.parse(localStorage.getItem(SYNC_KEY) || '{}') || {}; } catch (e) { return {}; } }
 const sync = { status: 'off', user: null, db: null, ref: null, unsub: null, cache: {}, uid: null, last: 0, localT: 0, timer: 0, applying: false, err: '', loading: null, wanted: false, pending: null, renderLater: false };
-(() => { const m = syncMeta(); sync.dev = m.dev || uid(); sync.wanted = !!m.on; if (m.uid) { sync.uid = m.uid; sync.cache = m.cache || {}; sync.last = m.last || 0; sync.localT = m.localT || 0; } })();
+(() => { const m = syncMeta(); sync.dev = m.dev || uid(); sync.wanted = !!m.on; sync.skipped = !!m.skipped; if (m.uid) { sync.uid = m.uid; sync.cache = m.cache || {}; sync.last = m.last || 0; sync.localT = m.localT || 0; } })();
 function syncSaveMeta() {
-  try { localStorage.setItem(SYNC_KEY, JSON.stringify({ on: sync.wanted, uid: sync.uid, cache: sync.cache, last: sync.last, localT: sync.localT, dev: sync.dev })); } catch (e) {}
+  try { localStorage.setItem(SYNC_KEY, JSON.stringify({ on: sync.wanted, skipped: !!sync.skipped, uid: sync.uid, cache: sync.cache, last: sync.last, localT: sync.localT, dev: sync.dev })); } catch (e) {}
 }
 function loadScript(src) {
   return new Promise((ok, fail) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = () => fail(new Error('load')); document.head.appendChild(s); });
@@ -2615,13 +2626,35 @@ function fbLoad() {
       firebase.auth().onAuthStateChanged(onAuth);
       return firebase;
     });
-  sync.loading.catch(() => { sync.loading = null; sync.status = 'unavailable'; syncRefresh(); });
+  sync.loading.catch(() => { sync.loading = null; sync.status = 'unavailable'; syncRefresh(); if (!$('#login').hidden) renderLogin(); });
   return sync.loading;
 }
-function authMsg(e) {
+const who = u => u ? (u.email || u.phoneNumber || u.displayName || 'you') : '';
+function authMsg(e, method = 'Google') {
   const c = (e && e.code) || '';
+  const M = {
+    'auth/invalid-email': 'That email address doesn’t look right.',
+    'auth/missing-password': 'Enter your password.',
+    'auth/invalid-credential': 'Email or password is wrong. Check them, or create an account if you’re new.',
+    'auth/invalid-login-credentials': 'Email or password is wrong. Check them, or create an account if you’re new.',
+    'auth/wrong-password': 'That password is wrong. Try again or reset it.',
+    'auth/user-not-found': 'There’s no account with that email. Create one instead.',
+    'auth/email-already-in-use': 'There’s already an account with that email. Sign in instead.',
+    'auth/weak-password': 'Use a password of at least 6 characters.',
+    'auth/too-many-requests': 'Too many attempts. Wait a few minutes and try again.',
+    'auth/invalid-phone-number': 'That number doesn’t look right. Use a UK mobile like 07700 900123, or include the country code.',
+    'auth/missing-phone-number': 'Enter your mobile number.',
+    'auth/invalid-verification-code': 'That code is wrong. Check the text message and try again.',
+    'auth/missing-verification-code': 'Enter the 6-digit code from the text message.',
+    'auth/code-expired': 'That code has expired. Send a new one.',
+    'auth/quota-exceeded': 'Firebase’s daily limit for text messages has been reached. Try again tomorrow or use another sign-in option.',
+    'auth/billing-not-enabled': 'Phone sign-in needs billing switched on in Firebase (the Blaze plan). Use Google or email for now.',
+    'auth/captcha-check-failed': `The robot check failed. Make sure ${location.hostname} is in Firebase Authentication, Settings, Authorized domains, then try again.`,
+    'auth/invalid-app-credential': `The robot check failed. Make sure ${location.hostname} is in Firebase Authentication, Settings, Authorized domains, then try again.`,
+  };
+  if (M[c]) return M[c];
   if (c === 'auth/unauthorized-domain') return `This website isn’t on Firebase’s authorised domains yet. In Firebase, go to Authentication, Settings, Authorized domains and add ${location.hostname}.`;
-  if (c === 'auth/operation-not-allowed' || c === 'auth/configuration-not-found') return 'Google sign-in isn’t switched on yet. In Firebase, go to Authentication, Sign-in method and enable Google.';
+  if (c === 'auth/operation-not-allowed' || c === 'auth/configuration-not-found') return `${method} sign-in isn’t switched on yet. In Firebase, go to Authentication, Sign-in method and enable ${method === 'Email' ? 'Email/Password' : method}.`;
   if (c === 'auth/network-request-failed') return 'No connection. Try again when you’re online.';
   return `Sign-in didn’t work (${c || (e && e.message) || 'unknown error'}). Try again.`;
 }
@@ -2660,7 +2693,7 @@ async function syncSignIn() {
     if (sync.status === 'unavailable') return;
     sync.wanted = !!sync.user; syncSaveMeta();
     if (e && e.code === 'auth/popup-closed-by-user') { sync.status = sync.user ? 'in' : 'off'; syncRefresh(); return; }
-    sync.status = sync.user ? 'in' : 'error'; sync.err = authMsg(e); syncRefresh(); toast(sync.err, 6000);
+    sync.status = sync.user ? 'in' : 'error'; sync.err = authMsg(e); syncRefresh(); if ($('#login').hidden) toast(sync.err, 6000);
   }
 }
 async function syncSignOut() {
@@ -2687,11 +2720,12 @@ async function syncStart(user) {
     snap.forEach(d => { remote[d.id] = d.data(); });
     const first = !Object.keys(sync.cache).length;
     if (!remote.meta) await syncPush(true);
-    else if (first && hasLocalData()) { syncAsk(remote); return; }
+    else if (first && hasLocalData()) { if (!$('#login').hidden) loginDone(); syncAsk(remote); return; }
     else syncMerge(remote, first);
     syncListen();
-    toast(`Signed in as ${user.email || user.displayName}. Sync is on.`);
-  } catch (e) { sync.status = 'error'; sync.err = fsMsg(e); syncRefresh(); toast(sync.err, 6000); }
+    if (!$('#login').hidden) loginDone();
+    toast(`Signed in as ${who(user)}. Sync is on.`);
+  } catch (e) { sync.status = 'error'; sync.err = fsMsg(e); syncRefresh(); toast(sync.err, 6000); if (!$('#login').hidden) loginMsg(sync.err); }
 }
 /* Decide per document whether the remote copy should replace ours. */
 function takeRemote(id, r, local) {
@@ -2781,14 +2815,14 @@ function syncCard() {
   let body;
   if (s.user) {
     const line = s.status === 'saving' || s.status === 'loading' ? 'Syncing…' : s.status === 'error' ? `<span class="err">${esc(s.err)}</span>` : `Up to date${t ? `, last synced at ${t}` : ''}.`;
-    body = `<p>Signed in as <b>${esc(s.user.email || s.user.displayName || 'you')}</b>. ${line}</p>
+    body = `<p>Signed in as <b>${esc(who(s.user))}</b>. ${line}</p>
       <div class="row"><button class="btn ghost sm" data-act="sync-now">Sync now</button><button class="btn ghost sm" data-act="sync-out">Sign out</button></div>`;
   } else if (s.status === 'unavailable') {
     body = `<p class="note">Sync can’t load here. Use the website version, which syncs: <a href="${SITE_URL}" target="_blank" rel="noopener">${SITE_URL.replace('https://', '')}</a></p>`;
   } else {
     body = `<p class="note">Sign in to keep your habits, tasks, goals and history the same on your phone and laptop. Everything still works offline, and changes upload when you’re back online.</p>
       ${s.status === 'error' && s.err ? `<p class="err">${esc(s.err)}</p>` : ''}
-      <div><button class="btn accent" data-act="sync-in" ${s.status === 'loading' ? 'disabled' : ''}>${s.status === 'loading' ? 'Signing in…' : 'Sign in with Google'}</button></div>`;
+      <div><button class="btn accent" data-act="login-open">Sign in or create an account</button></div>`;
   }
   return `<section class="card"><div class="ch"><h2>Sync across devices</h2>${s.user ? '<span class="meta">On</span>' : ''}</div>${body}</section>`;
 }
@@ -2804,6 +2838,114 @@ Object.assign(ACT, {
     syncListen(); toast('This device’s data is now in your account');
   },
 });
+
+/* ---------- Sign-in page: Google, email and password, or phone number ---------- */
+const login = { mode: 'email', emailMode: 'in', phoneStep: 'number', confirm: null, verifier: null, phone: '' };
+const G_ICON = '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.3l7.9 6.1C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.6c0-1.6-.1-3.1-.4-4.6H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.7c4.3-4 6.9-9.9 6.9-17z"/><path fill="#FBBC05" d="M10.5 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.6 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.4-5.7c-2.1 1.4-4.8 2.3-8.5 2.3-6.3 0-11.6-4.2-13.5-10l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>';
+function normPhone(v) {
+  let n = String(v || '').replace(/[\s().-]/g, '');
+  if (!n) return '';
+  if (n.startsWith('00')) n = '+' + n.slice(2);
+  else if (n.startsWith('0')) n = '+44' + n.slice(1);
+  else if (!n.startsWith('+')) n = '+' + n;
+  return n;
+}
+function resetVerifier() { if (login.verifier) { try { login.verifier.clear(); } catch (e) {} login.verifier = null; } }
+function loginShow() { $('#login').hidden = false; renderLogin(); fbLoad().catch(() => {}); }
+function loginDone() { $('#login').hidden = true; resetVerifier(); if (!S.onboarded) onboard(); }
+function loginMsg(err, ok = '') { const e = $('#loginErr'), o = $('#loginOk'); if (e) { e.textContent = err; e.hidden = !err; } if (o) { o.textContent = ok; o.hidden = !ok; } }
+function loginBusy(b) { $$('#login button, #login input').forEach(x => { x.disabled = b; }); }
+function renderLogin() {
+  resetVerifier();
+  const m = login.mode, up = login.emailMode === 'up', unavailable = sync.status === 'unavailable';
+  const email = m !== 'email' ? '' : `<form data-form="login-email" novalidate>
+      <label class="field"><span>Email</span><input type="email" name="email" id="lgEmail" autocomplete="email" inputmode="email" required></label>
+      <label class="field"><span>Password${up ? ' (at least 6 characters)' : ''}</span><input type="password" name="password" id="lgPass" autocomplete="${up ? 'new-password' : 'current-password'}" minlength="6" required></label>
+      <button class="btn accent block">${up ? 'Create account' : 'Sign in'}</button>
+      <p class="note" style="text-align:center">${up ? 'Already have an account? <button type="button" class="link" data-act="login-emailmode" data-v="in">Sign in</button>' : 'New here? <button type="button" class="link" data-act="login-emailmode" data-v="up">Create an account</button><br><button type="button" class="link" data-act="login-reset">Forgot your password?</button>'}</p>
+    </form>`;
+  const phone = m !== 'phone' ? '' : login.phoneStep === 'number' ? `<form data-form="login-phone" novalidate>
+      <label class="field"><span>Mobile number</span><input type="tel" name="phone" id="lgPhone" autocomplete="tel" inputmode="tel" placeholder="07700 900123" value="${esc(login.phone)}" required></label>
+      <button class="btn accent block">Text me a code</button>
+      <p class="note">UK numbers work as they are. For other countries, start with the country code, like +1.</p>
+    </form>` : `<form data-form="login-phone" novalidate>
+      <label class="field"><span>Code sent to ${esc(login.phone)}</span><input name="code" id="lgCode" autocomplete="one-time-code" inputmode="numeric" maxlength="6" placeholder="6-digit code" required></label>
+      <button class="btn accent block">Verify and sign in</button>
+      <p class="note" style="text-align:center"><button type="button" class="link" data-act="login-renum">Use a different number</button></p>
+    </form>`;
+  $('#login').innerHTML = `<div class="onb-in login-in">
+    <div class="lbrand"><svg viewBox="0 0 30 20"><path d="M2 13.5h26" stroke="var(--ghost)" stroke-width="2" stroke-dasharray="3 3"/><path d="M2 17l7-6 5 3 13-11" fill="none" stroke="var(--leaf)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>Discipline OS</div>
+    <h1>Not average.<br><em>Better than yesterday.</em></h1>
+    <p>Sign in to keep your habits, goals and history on every device.</p>
+    ${unavailable ? `<p class="err">Sign-in can’t load here. Use the website version to sign in: <a href="${SITE_URL}" target="_blank" rel="noopener">${SITE_URL.replace('https://', '')}</a></p>` : `
+    <button class="btn gbtn block" data-act="login-google">${G_ICON} Continue with Google</button>
+    <div class="orline">or</div>
+    <div class="seg" role="tablist">${[['email', 'Email'], ['phone', 'Phone number']].map(([v, l]) => `<button role="tab" aria-selected="${m === v}" class="${m === v ? 'on' : ''}" data-act="login-mode" data-v="${v}">${l}</button>`).join('')}</div>
+    ${email}${phone}`}
+    <p class="err" id="loginErr" hidden></p><p class="ok" id="loginOk" hidden></p>
+    <div id="recaptcha-box"></div>
+    <hr class="sep">
+    <button class="btn ghost block" data-act="login-skip">Use without an account</button>
+    <p class="note" style="text-align:center">Without an account your data stays on this device only. You can sign in later in Settings.</p>
+  </div>`;
+}
+async function loginEmail(f) {
+  const email = f.elements.email.value.trim(), pw = f.elements.password.value;
+  if (!email) return loginMsg('Enter your email address.');
+  if (!pw) return loginMsg('Enter your password.');
+  loginMsg(''); loginBusy(true);
+  try {
+    await fbLoad();
+    sync.wanted = true; syncSaveMeta();
+    const A = firebase.auth();
+    if (login.emailMode === 'up') await A.createUserWithEmailAndPassword(email, pw); else await A.signInWithEmailAndPassword(email, pw);
+    loginMsg('', 'Signed in. Loading your data…');
+  } catch (e) {
+    sync.wanted = !!sync.user; syncSaveMeta();
+    if (sync.status === 'unavailable') renderLogin(); else loginMsg(authMsg(e, 'Email'));
+  }
+  loginBusy(false);
+}
+async function loginPhone(f) {
+  loginMsg('');
+  if (login.phoneStep === 'number') {
+    const num = normPhone(f.elements.phone.value);
+    if (!num) return loginMsg('Enter your mobile number.');
+    login.phone = num; loginBusy(true);
+    try {
+      await fbLoad();
+      login.verifier = login.verifier || new firebase.auth.RecaptchaVerifier('recaptcha-box', { size: 'invisible' });
+      login.confirm = await firebase.auth().signInWithPhoneNumber(num, login.verifier);
+      login.phoneStep = 'code'; renderLogin(); loginMsg('', `Code sent to ${num}. It can take a minute to arrive.`);
+      setTimeout(() => { const c = $('#lgCode'); c && c.focus(); }, 30);
+    } catch (e) { resetVerifier(); const box = $('#recaptcha-box'); if (box) box.replaceWith(Object.assign(document.createElement('div'), { id: 'recaptcha-box' })); if (sync.status === 'unavailable') renderLogin(); else loginMsg(authMsg(e, 'Phone')); }
+    loginBusy(false);
+    return;
+  }
+  const code = f.elements.code.value.replace(/\D/g, '');
+  if (code.length < 6) return loginMsg('Enter the 6-digit code from the text message.');
+  loginBusy(true);
+  try { sync.wanted = true; syncSaveMeta(); await login.confirm.confirm(code); loginMsg('', 'Signed in. Loading your data…'); }
+  catch (e) { sync.wanted = !!sync.user; syncSaveMeta(); loginMsg(authMsg(e, 'Phone')); }
+  loginBusy(false);
+}
+Object.assign(ACT, {
+  'login-open': () => { closeSheet(); loginShow(); },
+  'login-mode': a => { login.mode = a.dataset.v; renderLogin(); },
+  'login-emailmode': a => { login.emailMode = a.dataset.v; renderLogin(); },
+  'login-renum': () => { login.phoneStep = 'number'; login.confirm = null; renderLogin(); },
+  'login-google': async () => { loginMsg(''); loginBusy(true); await syncSignIn(); loginBusy(false); if (sync.status === 'unavailable') renderLogin(); else if (sync.status === 'error' && !sync.user) loginMsg(sync.err); },
+  'login-reset': async () => {
+    const email = ($('#lgEmail') || {}).value || '';
+    if (!email.trim()) return loginMsg('Type your email address above, then tap Forgot password again.');
+    loginBusy(true);
+    try { await fbLoad(); await firebase.auth().sendPasswordResetEmail(email.trim()); loginMsg('', `Password reset email sent to ${email.trim()}. Check your spam folder too.`); }
+    catch (e) { loginMsg(authMsg(e, 'Email')); }
+    loginBusy(false);
+  },
+  'login-skip': () => { sync.skipped = true; syncSaveMeta(); loginDone(); },
+});
+Object.assign(FORMS, { 'login-email': loginEmail, 'login-phone': loginPhone });
 document.addEventListener('focusout', () => { if (sync.renderLater) setTimeout(() => { if (sync.renderLater && !(document.activeElement && document.activeElement.matches('input,textarea,select'))) { sync.renderLater = false; render(); } }, 0); });
 window.addEventListener('pagehide', () => { if (sync.ref) syncPush(false); });
 document.addEventListener('visibilitychange', () => { if (document.hidden && sync.ref) syncPush(false); });
@@ -2820,7 +2962,8 @@ const startView = location.hash.slice(1);
 ui.view = VIEWS[startView] ? startView : 'today';
 render();
 if (S.focusRun) showLaser();
-if (!S.onboarded) onboard();
+if (!sync.wanted && !sync.skipped) loginShow();
+else if (!S.onboarded) onboard();
 if (sync.wanted) fbLoad().catch(() => {});
 })();
 </script>
