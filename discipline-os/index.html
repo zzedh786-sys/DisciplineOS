@@ -1854,7 +1854,11 @@ function openSheet(title, body) {
   const f = $('#sheet input:not([type=hidden]):not([type=radio]):not([type=checkbox]), #sheet textarea');
   if (f && matchMedia('(pointer:fine)').matches) setTimeout(() => f.focus(), 30);
 }
-function closeSheet() { $('#modal').hidden = true; $('#sheet').innerHTML = ''; ui.confirm = ''; }
+function closeSheet() {
+  $('#modal').hidden = true; $('#sheet').innerHTML = ''; ui.confirm = '';
+  /* The keep-which-data choice can't be dismissed: sync stays paused until it's made. */
+  if (typeof sync !== 'undefined' && sync.pending) setTimeout(() => { if (sync.pending && $('#modal').hidden) syncAsk(sync.pending); }, 0);
+}
 
 function mHabit(h, routine) {
   const isNew = !h;
@@ -2722,6 +2726,7 @@ async function syncStart(user) {
     if (!remote.meta) await syncPush(true);
     else if (first && hasLocalData()) { if (!$('#login').hidden) loginDone(); syncAsk(remote); return; }
     else syncMerge(remote, first);
+    sync.checked = Date.now();
     syncListen();
     if (!$('#login').hidden) loginDone();
     toast(`Signed in as ${who(user)}. Sync is on.`);
@@ -2760,23 +2765,44 @@ function syncMerge(remote, all) {
   sync.status = 'in'; syncSaveMeta();
   syncPush(false);
 }
+/* Apply documents from the account. Used by the live listener and by the fallback pull, which covers phones
+   that drop the live connection while the app is in the background. */
+function receiveDocs(list) {
+  const local = localDocs();
+  let changed = false;
+  for (const { id, r } of list) {
+    if (!r || typeof r.json !== 'string' || r.dev === sync.dev) continue;
+    if (takeRemote(id, r, local)) { applyDoc(id, r.json); changed = true; }
+    sync.cache[id] = r.json;
+  }
+  if (changed) { sync.lastIn = Date.now(); sync.last = Date.now(); syncSaveMeta(); finishApply(); toast('Updated from your other device', 1800); }
+  return changed;
+}
 function syncListen() {
   if (sync.unsub) sync.unsub();
-  sync.unsub = sync.ref.onSnapshot(snap => {
-    const local = localDocs();
-    let changed = false;
-    snap.docChanges().forEach(ch => {
-      if (ch.type === 'removed') return;
-      const d = ch.doc, r = d.data();
-      if (d.metadata.hasPendingWrites || !r || r.dev === sync.dev) return;
-      if (takeRemote(d.id, r, local)) { applyDoc(d.id, r.json); changed = true; }
-      sync.cache[d.id] = r.json;
-    });
-    if (changed) { sync.last = Date.now(); syncSaveMeta(); finishApply(); toast('Updated from your other device', 1800); }
-  }, e => { sync.status = 'error'; sync.err = fsMsg(e); syncRefresh(); });
+  sync.unsub = sync.ref.onSnapshot({ includeMetadataChanges: true }, snap => {
+    if (snap.metadata) { sync.live = !snap.metadata.fromCache; }
+    const list = [];
+    snap.docChanges().forEach(ch => { if (ch.type !== 'removed' && !ch.doc.metadata.hasPendingWrites) list.push({ id: ch.doc.id, r: ch.doc.data() }); });
+    receiveDocs(list);
+    sync.checked = Date.now();
+    syncRefresh();
+  }, e => { sync.live = false; sync.status = 'error'; sync.err = fsMsg(e); syncRefresh(); });
+}
+async function syncPull() {
+  if (!sync.ref || sync.pending) return false;
+  let snap;
+  try { snap = await sync.ref.get({ source: 'server' }); }
+  catch (e) { if (e && e.code === 'unavailable') { sync.live = false; syncRefresh(); return false; } throw e; }
+  const list = []; snap.forEach(d => list.push({ id: d.id, r: d.data() }));
+  const changed = receiveDocs(list);
+  sync.checked = Date.now(); sync.live = true;
+  if (!sync.unsub) syncListen();
+  syncRefresh();
+  return changed;
 }
 async function syncPush(all, removeIds = []) {
-  if (!sync.ref) return;
+  if (!sync.ref || (sync.pending && !all)) return;
   clearTimeout(sync.timer);
   const docs = localDocs(), batch = sync.db.batch(), sent = {};
   let n = 0;
@@ -2792,7 +2818,7 @@ async function syncPush(all, removeIds = []) {
   syncRefresh();
 }
 function syncSchedule() {
-  if (sync.applying || !sync.ref) return;
+  if (sync.applying || !sync.ref || sync.pending) return;
   sync.localT = Date.now();
   clearTimeout(sync.timer); sync.timer = setTimeout(() => syncPush(false), 1500);
 }
@@ -2807,16 +2833,25 @@ function syncAsk(remote) {
       <button class="btn accent block" data-act="sync-remote">Use my account’s data on this device</button>
       <button class="btn ghost block" data-act="sync-local">Replace my account with this device’s data</button>
     </div>
-    <p class="note">Either way, everything stays in sync from now on. If unsure, back up this device first in Settings.</p>`);
+    <p class="note">Either way, everything stays in sync from now on. Sync is paused until you choose. If unsure, back up this device first in Settings.</p>`);
   syncRefresh();
 }
 function syncCard() {
   const s = sync, t = s.last ? new Date(s.last).toTimeString().slice(0, 5) : '';
   let body;
   if (s.user) {
-    const line = s.status === 'saving' || s.status === 'loading' ? 'Syncing…' : s.status === 'error' ? `<span class="err">${esc(s.err)}</span>` : `Up to date${t ? `, last synced at ${t}` : ''}.`;
-    body = `<p>Signed in as <b>${esc(who(s.user))}</b>. ${line}</p>
-      <div class="row"><button class="btn ghost sm" data-act="sync-now">Sync now</button><button class="btn ghost sm" data-act="sync-out">Sign out</button></div>`;
+    const hm = x => x ? new Date(x).toTimeString().slice(0, 5) : 'not yet';
+    const prov = ((s.user.providerData || [])[0] || {}).providerId || (s.user.phoneNumber ? 'phone' : s.user.email ? 'password' : '');
+    const method = { 'google.com': 'Google', password: 'email and password', phone: 'phone number' }[prov] || 'your account';
+    const line = s.pending ? '<span class="err">Paused until you choose which data to keep.</span>' : s.status === 'saving' || s.status === 'loading' ? 'Syncing…' : s.status === 'error' ? `<span class="err">${esc(s.err)}</span>` : s.live === false ? 'Offline. Changes will sync when you reconnect.' : 'Live: changes from your other devices appear here within seconds.';
+    body = `<p>Signed in as <b>${esc(who(s.user))}</b> with ${method}.</p>
+      <p>${line}</p>
+      <div class="pastr">
+        <div><b>Account ID:</b> ${esc(s.user.uid.slice(0, 6))}</div>
+        <div><b>Last sent:</b> ${hm(s.last)}. <b>Last received:</b> ${hm(s.lastIn)}. <b>Last checked:</b> ${hm(s.checked)}.</div>
+      </div>
+      <p class="note">Your other devices must show the same account ID. Each sign-in method (Google, email, phone) is a separate account, so use the same one everywhere.</p>
+      <div class="row">${s.pending ? `<button class="btn accent sm" data-act="sync-choose">Choose which data to keep</button>` : ''}<button class="btn ghost sm" data-act="sync-now">Sync now</button><button class="btn ghost sm" data-act="sync-out">Sign out</button></div>`;
   } else if (s.status === 'unavailable') {
     body = `<p class="note">Sync can’t load here. Use the website version, which syncs: <a href="${SITE_URL}" target="_blank" rel="noopener">${SITE_URL.replace('https://', '')}</a></p>`;
   } else {
@@ -2829,7 +2864,13 @@ function syncCard() {
 Object.assign(ACT, {
   'sync-in': () => syncSignIn(),
   'sync-out': () => syncSignOut(),
-  'sync-now': async () => { await syncPush(false); if (sync.status === 'in') toast('All synced'); else if (sync.err) toast(sync.err, 5000); },
+  'sync-now': async () => {
+    if (sync.pending) return syncAsk(sync.pending);
+    try { await syncPush(false); const got = await syncPull(); if (sync.status === 'error') toast(sync.err, 5000); else toast(got ? 'Synced. Changes from your other device are in.' : 'Synced. Everything matches your account.'); }
+    catch (e) { sync.err = fsMsg(e); toast(sync.err, 5000); }
+    syncRefresh();
+  },
+  'sync-choose': () => sync.pending && syncAsk(sync.pending),
   'sync-remote': () => { const r = sync.pending; sync.pending = null; closeSheet(); syncMerge(r, true); syncListen(); toast('Your account’s data is now on this device'); },
   'sync-local': async () => {
     const r = sync.pending; sync.pending = null; closeSheet();
@@ -2948,7 +2989,10 @@ Object.assign(ACT, {
 Object.assign(FORMS, { 'login-email': loginEmail, 'login-phone': loginPhone });
 document.addEventListener('focusout', () => { if (sync.renderLater) setTimeout(() => { if (sync.renderLater && !(document.activeElement && document.activeElement.matches('input,textarea,select'))) { sync.renderLater = false; render(); } }, 0); });
 window.addEventListener('pagehide', () => { if (sync.ref) syncPush(false); });
-document.addEventListener('visibilitychange', () => { if (document.hidden && sync.ref) syncPush(false); });
+document.addEventListener('visibilitychange', () => { if (!sync.ref) return; if (document.hidden) syncPush(false); else syncPull().catch(() => {}); });
+window.addEventListener('focus', () => { if (sync.ref && Date.now() - (sync.checked || 0) > 5000) syncPull().catch(() => {}); });
+window.addEventListener('online', () => { if (sync.ref) { syncPush(false); syncPull().catch(() => {}); } });
+setInterval(() => { if (sync.ref && !document.hidden) syncPull().catch(() => {}); }, 60000);
 
 /* =========================================================
    Boot
