@@ -2,7 +2,9 @@
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#F4F1F9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#150E22" media="(prefers-color-scheme: dark)">
 <title>Discipline OS</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Discipline OS: habits, routines, goals, tasks and focus, built on Atomic Habits and Make Time. Better than yesterday.">
@@ -56,8 +58,8 @@
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--font-b);font-variant-numeric:tabular-nums;-webkit-tap-highlight-color:transparent;overflow-x:hidden;min-height:100vh}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;touch-action:manipulation;overscroll-behavior-x:none}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--font-b);font-variant-numeric:tabular-nums;-webkit-tap-highlight-color:transparent;overflow-x:hidden;min-height:100vh;min-height:100dvh}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:40;background:var(--bg)}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0}
@@ -264,6 +266,20 @@ details[open]>summary::before{content:"− "}
 .fab{position:fixed;z-index:31;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(84px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:8px;padding:12px 18px 12px 14px;border-radius:999px;background:var(--ink);color:var(--bg);font-weight:700;font-size:15px;box-shadow:var(--lift)}
 .fab svg{width:22px;height:22px;color:var(--leaf)}
 @media (min-width:960px){.fab{bottom:calc(28px + env(safe-area-inset-bottom,0px))}}
+@media (max-width:600px){
+  .fab{width:52px;height:52px;padding:0;justify-content:center;bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  .fab span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .fab svg{width:24px;height:24px}
+  main{padding-bottom:150px}
+}
+@media (max-width:370px){
+  .lvchip .bar{display:none}
+  .lvchip{padding:4px}
+  .brand{font-size:17px}
+  .top .in{gap:8px}
+  h2{font-size:23px}
+  .tab{font-size:11px}
+}
 
 /* ---------- habit rows ---------- */
 .hlist{display:grid}
@@ -420,7 +436,7 @@ body.dragging{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .goal .gp{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin-top:9px}
 .stepper{display:flex;align-items:center;gap:5px}
 .stepper button{min-width:34px;padding:0 8px;height:34px;border-radius:10px;background:var(--surface-2);font:800 16px/1 var(--font-d)}
-.stepper input{width:76px;padding:6px 8px;text-align:center;font-size:15px}
+.stepper input{width:76px;padding:6px 8px;text-align:center;font-size:16px}
 .gnum{font-size:14px;font-weight:700;color:var(--ink-2);white-space:nowrap}
 
 /* ---------- progress ---------- */
@@ -503,7 +519,7 @@ table.hg td{padding:0}
 .ov .row{justify-content:center}
 
 #modal{position:fixed;inset:0;z-index:95;background:var(--scrim);display:flex;align-items:flex-end;justify-content:center}
-#modal .sheet{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:var(--bg);border-radius:26px 26px 0 0;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}
+#modal .sheet{width:100%;max-width:560px;max-height:92vh;max-height:92dvh;overflow:auto;background:var(--bg);border-radius:26px 26px 0 0;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));animation:up .22s ease-out}
 @media (min-width:640px){#modal{align-items:center}#modal .sheet{border-radius:26px;max-height:86vh}}
 @keyframes up{from{transform:translateY(24px);opacity:0}}
 .sh{position:sticky;top:0;z-index:1;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:18px 18px 12px;background:var(--bg)}
@@ -3018,6 +3034,11 @@ document.addEventListener('visibilitychange', () => { if (!sync.ref) return; if 
 window.addEventListener('focus', () => { if (sync.ref && Date.now() - (sync.checked || 0) > 5000) syncPull().catch(() => {}); });
 window.addEventListener('online', () => { if (sync.ref) { syncPush(false); syncPull().catch(() => {}); } });
 setInterval(() => { if (sync.ref && !document.hidden) syncPull().catch(() => {}); }, 60000);
+
+/* No pinch or double-tap zoom: iOS Safari ignores user-scalable=no, so its gesture events are cancelled too. */
+['gesturestart', 'gesturechange', 'gestureend'].forEach(ev => document.addEventListener(ev, e => e.preventDefault(), { passive: false }));
+document.addEventListener('touchmove', e => { if (e.touches && e.touches.length > 1) e.preventDefault(); }, { passive: false });
+document.addEventListener('wheel', e => { if (e.ctrlKey) e.preventDefault(); }, { passive: false });
 
 /* =========================================================
    Boot
