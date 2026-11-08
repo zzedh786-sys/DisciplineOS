@@ -2668,6 +2668,7 @@ function fsMsg(e) {
   if (c === 'permission-denied') return 'Firebase refused access to your data. Check the Firestore rules were published.';
   if (c === 'not-found' || c === 'failed-precondition') return 'The Firestore database isn’t set up yet. Create it in Firebase under Databases and storage, Firestore.';
   if (c === 'unavailable') return 'You’re offline. Changes will upload when you’re back online.';
+  if (c === 'timeout') return 'Your data didn’t load after 15 seconds. In Firebase, check that the Firestore Database exists, is the Standard edition and is named (default). If it does, check your connection and tap Try again.';
   return `Sync hit a problem (${c || (e && e.message) || 'unknown error'}).`;
 }
 function syncRefresh() {
@@ -2734,7 +2735,11 @@ async function syncStart(user) {
   syncSaveMeta(); syncRefresh();
   sync.ref = sync.db.collection('users').doc(user.uid).collection('data');
   try {
-    const snap = await sync.ref.get(), remote = {};
+    const slow = setTimeout(() => { if (!$('#login').hidden && sync.status === 'loading') loginMsg('', 'Still loading your data. This can take a moment on a slow connection…'); }, 5000);
+    let snap;
+    try { snap = await Promise.race([sync.ref.get(), new Promise((_, no) => setTimeout(() => no({ code: 'timeout' }), 15000))]); }
+    finally { clearTimeout(slow); }
+    const remote = {};
     snap.forEach(d => { remote[d.id] = d.data(); });
     const first = !Object.keys(sync.cache).length;
     if (!remote.meta) await syncPush(true);
@@ -2744,7 +2749,12 @@ async function syncStart(user) {
     syncListen();
     if (!$('#login').hidden) loginDone();
     toast(`Signed in as ${who(user)}. Sync is on.`);
-  } catch (e) { sync.status = 'error'; sync.err = fsMsg(e); syncRefresh(); toast(sync.err, 6000); if (!$('#login').hidden) loginMsg(sync.err); }
+  } catch (e) {
+    /* Don't trap the user on the sign-in page: let them in, keep data on the device, and say why sync isn't on. */
+    sync.status = 'error'; sync.err = fsMsg(e); sync.ref = null;
+    if (!$('#login').hidden) loginDone();
+    syncRefresh(); toast(`Signed in, but sync couldn’t start. ${sync.err} See Settings.`, 9000);
+  }
 }
 /* Decide per document whether the remote copy should replace ours. */
 function takeRemote(id, r, local) {
@@ -2865,7 +2875,7 @@ function syncCard() {
         <div><b>Last sent:</b> ${hm(s.last)}. <b>Last received:</b> ${hm(s.lastIn)}. <b>Last checked:</b> ${hm(s.checked)}.</div>
       </div>
       <p class="note">Your other devices must show the same account ID. Each sign-in method (Google, email, phone) is a separate account, so use the same one everywhere.</p>
-      <div class="row">${s.pending ? `<button class="btn accent sm" data-act="sync-choose">Choose which data to keep</button>` : ''}<button class="btn ghost sm" data-act="sync-now">Sync now</button><button class="btn ghost sm" data-act="sync-out">Sign out</button></div>`;
+      <div class="row">${s.pending ? `<button class="btn accent sm" data-act="sync-choose">Choose which data to keep</button>` : ''}${s.status === 'error' && !s.ref ? `<button class="btn accent sm" data-act="sync-retry">Try again</button>` : ''}<button class="btn ghost sm" data-act="sync-now">Sync now</button><button class="btn ghost sm" data-act="sync-out">Sign out</button></div>`;
   } else if (s.status === 'unavailable') {
     body = `<p class="note">Sync can’t load here. Use the website version, which syncs: <a href="${SITE_URL}" target="_blank" rel="noopener">${SITE_URL.replace('https://', '')}</a></p>`;
   } else {
@@ -2885,6 +2895,7 @@ Object.assign(ACT, {
     syncRefresh();
   },
   'sync-choose': () => sync.pending && syncAsk(sync.pending),
+  'sync-retry': () => { if (sync.user) { sync.err = ''; syncStart(sync.user); } },
   'sync-remote': () => { const r = sync.pending; sync.pending = null; closeSheet(); syncMerge(r, true); syncListen(); toast('Your account’s data is now on this device'); },
   'sync-local': async () => {
     const r = sync.pending; sync.pending = null; closeSheet();
