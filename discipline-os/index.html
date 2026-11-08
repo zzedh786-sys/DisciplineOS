@@ -2628,6 +2628,7 @@ function fbLoad() {
       if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
       sync.db = firebase.firestore();
       firebase.auth().onAuthStateChanged(onAuth);
+      firebase.auth().getRedirectResult().catch(e => { if (!$('#login').hidden) loginMsg(authMsg(e)); });
       return firebase;
     });
   sync.loading.catch(() => { sync.loading = null; sync.status = 'unavailable'; syncRefresh(); if (!$('#login').hidden) renderLogin(); });
@@ -2682,24 +2683,37 @@ function localDocs() {
   return out;
 }
 
-async function syncSignIn() {
-  sync.status = 'loading'; sync.err = ''; sync.wanted = true; syncSaveMeta(); syncRefresh();
-  try {
-    await fbLoad();
-    const p = new firebase.auth.GoogleAuthProvider();
-    p.setCustomParameters({ prompt: 'select_account' });
-    try { await firebase.auth().signInWithPopup(p); }
-    catch (e) {
-      if (['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment', 'auth/cancelled-popup-request'].includes(e.code)) await firebase.auth().signInWithRedirect(p);
-      else throw e;
-    }
-  } catch (e) {
-    if (sync.status === 'unavailable') return;
-    sync.wanted = !!sync.user; syncSaveMeta();
-    if (e && e.code === 'auth/popup-closed-by-user') { sync.status = sync.user ? 'in' : 'off'; syncRefresh(); return; }
-    sync.status = sync.user ? 'in' : 'error'; sync.err = authMsg(e); syncRefresh(); if ($('#login').hidden) toast(sync.err, 6000);
+/* Google sign-in. The popup must open in the same tick as the tap, or browsers treat it as unrequested and block
+   it, so the SDK is preloaded when the sign-in page shows. There is no redirect fallback: the site (github.io) and
+   Firebase's auth domain (firebaseapp.com) differ, and current browsers block the storage that flow needs. */
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+function googleSignIn(done) {
+  const say = (err, ok) => { if (!$('#login').hidden) loginMsg(err, ok); else if (err) toast(err, 7000); };
+  if (!window.firebase || !sync.db) {
+    say('', 'Getting Google sign-in ready. Tap Continue with Google again in a moment.');
+    fbLoad().then(() => say('', 'Ready. Tap Continue with Google.')).catch(() => {});
+    return;
   }
+  const p = new firebase.auth.GoogleAuthProvider();
+  p.setCustomParameters({ prompt: 'select_account' });
+  sync.wanted = true; sync.err = ''; syncSaveMeta();
+  firebase.auth().signInWithPopup(p).then(() => { say('', 'Signed in. Loading your data…'); if (done) done(); }).catch(e => {
+    sync.wanted = !!sync.user; syncSaveMeta();
+    const c = (e && e.code) || '';
+    let msg;
+    if (c === 'auth/popup-closed-by-user' || c === 'auth/cancelled-popup-request') msg = 'The Google window closed before sign-in finished. Try again and pick your account in the window that opens.';
+    else if (c === 'auth/popup-blocked' || c === 'auth/operation-not-supported-in-this-environment')
+      msg = isStandalone()
+        ? 'Google sign-in can’t open from the home-screen app. Open the site in Safari or Chrome to sign in with Google, or use email or phone here.'
+        : 'Your browser blocked the Google window. Allow pop-ups for this site in your browser settings, then try again. Or use email or phone.';
+    else msg = authMsg(e);
+    if (c && !msg.includes(c)) msg += ` (${c})`;
+    sync.status = sync.user ? 'in' : 'error'; sync.err = msg; syncRefresh();
+    say(msg);
+    if (done) done();
+  });
 }
+function syncSignIn() { googleSignIn(); }
 async function syncSignOut() {
   if (sync.unsub) sync.unsub();
   sync.unsub = null; sync.ref = null;
@@ -2975,7 +2989,7 @@ Object.assign(ACT, {
   'login-mode': a => { login.mode = a.dataset.v; renderLogin(); },
   'login-emailmode': a => { login.emailMode = a.dataset.v; renderLogin(); },
   'login-renum': () => { login.phoneStep = 'number'; login.confirm = null; renderLogin(); },
-  'login-google': async () => { loginMsg(''); loginBusy(true); await syncSignIn(); loginBusy(false); if (sync.status === 'unavailable') renderLogin(); else if (sync.status === 'error' && !sync.user) loginMsg(sync.err); },
+  'login-google': () => { if (sync.status === 'unavailable') return renderLogin(); loginMsg(''); googleSignIn(); },
   'login-reset': async () => {
     const email = ($('#lgEmail') || {}).value || '';
     if (!email.trim()) return loginMsg('Type your email address above, then tap Forgot password again.');
